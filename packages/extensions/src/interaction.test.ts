@@ -162,6 +162,58 @@ describe("EditorView interaction regression", () => {
     malicious.destroy();
   });
 
+  it("keeps inline, table-cell, and code paste within their editing boundaries", () => {
+    const inline = createView("left/right");
+    inline.view.dispatch(inline.view.state.tr.setSelection(TextSelection.create(inline.view.state.doc, 5)));
+    dispatchHtmlPaste(inline.view, "<span>+</span>");
+    expect(inline.editor.getState().doc.childCount).toBe(1);
+    expect(inline.editor.getState().doc.textContent).toBe("left+/right");
+    inline.destroy();
+
+    const schema = createMarkdownSchema();
+    const table = createView("", tableDocument(schema));
+    table.view.dispatch(table.view.state.tr.setSelection(TextSelection.create(table.view.state.doc, 5)));
+    dispatchHtmlPaste(table.view, "<p><strong>safe</strong></p>");
+    const cell = table.editor.getState().doc.firstChild?.firstChild?.firstChild;
+    expect(cell?.childCount).toBe(1);
+    expect(cell?.firstChild?.type.name).toBe("paragraph");
+    expect(cell?.textContent).toBe("xsafe");
+    table.destroy();
+
+    const codeDocument = schema.node("doc", null, [schema.node("code_block", { language: null }, schema.text("x"))]);
+    const code = createView("", codeDocument);
+    code.view.dispatch(code.view.state.tr.setSelection(TextSelection.atEnd(code.view.state.doc)));
+    dispatchHtmlPaste(code.view, "<h1>unsafe structure</h1>", "plain text");
+    expect(code.editor.getState().doc.firstChild?.type.name).toBe("code_block");
+    expect(code.editor.getState().doc.textContent).toBe("xplain text");
+    code.destroy();
+  });
+
+  it("uses plain fallback for empty safe HTML and preserves selections without plain text", () => {
+    const withPlain = createView("replace");
+    withPlain.view.dispatch(withPlain.view.state.tr.setSelection(TextSelection.create(withPlain.view.state.doc, 1, 8)));
+    dispatchHtmlPaste(withPlain.view, "<script>drop</script>", "fallback");
+    expect(withPlain.editor.getState().doc.textContent).toBe("fallback");
+    withPlain.destroy();
+
+    const withoutPlain = createView("keep");
+    withoutPlain.view.dispatch(withoutPlain.view.state.tr.setSelection(TextSelection.create(withoutPlain.view.state.doc, 1, 5)));
+    dispatchHtmlPaste(withoutPlain.view, "<iframe src='https://evil.example'></iframe>");
+    expect(withoutPlain.editor.getState().doc.textContent).toBe("keep");
+    withoutPlain.destroy();
+  });
+
+  it("rejects external HTML drop so it cannot bypass paste normalization", () => {
+    const interaction = createView("keep");
+    const event = new Event("drop", { bubbles: true, cancelable: true }) as DragEvent;
+    Object.defineProperty(event, "dataTransfer", { value: { getData: (type: string) => type === "text/html" ? "<script>drop</script>" : "" } });
+
+    const handled = interaction.view.someProp("handleDrop", (handler) => handler(interaction.view, event, interaction.view.state.selection.content(), false));
+    expect(handled).toBe(true);
+    expect(interaction.editor.getState().doc.textContent).toBe("keep");
+    interaction.destroy();
+  });
+
   it("keeps every dangerous URL fixture non-navigating after actual paste events", () => {
     for (const href of interactionFixtures.unsafeHrefs) {
       const interaction = createView("");
@@ -237,11 +289,11 @@ function dispatchKey(view: EditorView, key: string, ctrlKey = true, shiftKey = f
   }
 }
 
-function dispatchHtmlPaste(view: EditorView, html: string): void {
+function dispatchHtmlPaste(view: EditorView, html: string, plain = ""): void {
   const event = new Event("paste", { bubbles: true, cancelable: true }) as ClipboardEvent;
   Object.defineProperty(event, "clipboardData", {
     configurable: true,
-    value: { getData: (type: string) => type === "text/html" ? html : "" }
+    value: { getData: (type: string) => type === "text/html" ? html : type === "text/plain" ? plain : "" }
   });
   view.dom.dispatchEvent(event);
 }

@@ -36,4 +36,14 @@ describe("safe HTML paste", () => {
     expect(paragraph?.firstChild?.marks).toHaveLength(0);
     expect(paragraph?.lastChild?.marks[0]?.type.name).toBe("link");
   });
+
+  it("collects only rows owned by the pasted table", () => {
+    const schema = createMarkdownSchema();
+    const slice = parsePastedHtml("<table><tr><td>outer<table><tr><td>nested</td></tr></table></td></tr></table>", schema);
+    const table = slice.content.firstChild;
+
+    expect(table?.type.name).toBe("table");
+    expect(table?.childCount).toBe(1);
+    expect(table?.firstChild?.childCount).toBe(1);
+  });
 });

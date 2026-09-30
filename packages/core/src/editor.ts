@@ -24,6 +24,7 @@ export interface Editor {
   readonly commands: EditorCommands;
   readonly extensionCommands: Readonly<Record<string, () => boolean>>;
   getState(): EditorState;
+  isDestroyed(): boolean;
   dispatch(transaction: Transaction): boolean;
   subscribe(listener: EditorListener): () => void;
   destroy(): void;
@@ -65,6 +66,10 @@ class HeadlessEditor implements Editor {
 
   getState(): EditorState {
     return this.state;
+  }
+
+  isDestroyed(): boolean {
+    return this.destroyed;
   }
 
   /**

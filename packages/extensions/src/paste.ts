@@ -1,5 +1,5 @@
 import { Fragment, Slice, type Mark, type Node as ProseMirrorNode, type Schema } from "prosemirror-model";
-import { Plugin } from "prosemirror-state";
+import { Plugin, type EditorState, type Transaction } from "prosemirror-state";
 import { isSafeUrl } from "./safe-url.js";
 
 const DROPPED_ELEMENTS = new Set(["script", "style", "iframe", "object", "embed", "template", "noscript"]);
@@ -12,12 +12,34 @@ export function createSafePastePlugin(): Plugin {
     props: {
       handlePaste(view, event) {
         const html = event.clipboardData?.getData("text/html");
+        const plainText = event.clipboardData?.getData("text/plain") ?? "";
+        if ((event as ClipboardEvent & { readonly shiftKey?: boolean }).shiftKey === true) {
+          return replaceSelectionWithPlainText(view.state, plainText, view.dispatch);
+        }
         if (html === undefined || html.length === 0) {
           return false;
         }
 
-        view.dispatch(view.state.tr.replaceSelection(parsePastedHtml(html, view.state.schema)));
+        const slice = parsePastedHtml(html, view.state.schema);
+        if (slice.content.size === 0) {
+          return plainText.length > 0
+            ? replaceSelectionWithPlainText(view.state, plainText, view.dispatch)
+            : true;
+        }
+
+        const context = pasteContext(view.state);
+        if (context === "code" || context === "raw") {
+          return replaceSelectionWithPlainText(view.state, plainText || textFromSlice(slice), view.dispatch);
+        }
+        if (context === "table-cell") {
+          return replaceSelectionWithInlineContent(view.state, inlineContent(slice, view.state.schema), view.dispatch);
+        }
+
+        view.dispatch(view.state.tr.replaceSelection(inlineSlice(slice)));
         return true;
+      },
+      handleDrop(_view, event, _slice, moved) {
+        return !moved && (event.dataTransfer?.getData("text/html").length ?? 0) > 0;
       }
     }
   });
@@ -128,7 +150,7 @@ function parseTable(element: Element, schema: Schema): ProseMirrorNode[] {
     return [];
   }
 
-  const sourceRows = Array.from(element.querySelectorAll("tr"))
+  const sourceRows = tableRows(element)
     .map((row) => ({ row, cells: Array.from(row.children).filter((cell) => ["td", "th"].includes(cell.tagName.toLowerCase())) }))
     .filter(({ cells }) => cells.length > 0);
   const width = Math.max(0, ...sourceRows.map(({ cells }) => cells.length));
@@ -143,6 +165,19 @@ function parseTable(element: Element, schema: Schema): ProseMirrorNode[] {
   })));
 
   return [tableType.create(null, rows)];
+}
+
+function tableRows(element: Element): Element[] {
+  const rows: Element[] = [];
+  for (const child of Array.from(element.children)) {
+    const name = child.tagName.toLowerCase();
+    if (name === "tr") {
+      rows.push(child);
+    } else if (name === "thead" || name === "tbody" || name === "tfoot") {
+      rows.push(...Array.from(child.children).filter((row) => row.tagName.toLowerCase() === "tr"));
+    }
+  }
+  return rows;
 }
 
 function blocksFromChildren(element: Element, schema: Schema): ProseMirrorNode[] {
@@ -211,4 +246,66 @@ function isBlockElement(node: globalThis.Node): boolean {
 function parseOrder(element: Element): number {
   const value = Number.parseInt(element.getAttribute("start") ?? "1", 10);
   return Number.isSafeInteger(value) && value > 0 ? value : 1;
+}
+
+function pasteContext(state: EditorState): "code" | "raw" | "table-cell" | "normal" {
+  for (let depth = state.selection.$from.depth; depth >= 0; depth -= 1) {
+    const name = state.selection.$from.node(depth).type.name;
+    if (name === "code_block") {
+      return "code";
+    }
+    if (name === "raw_markdown_block") {
+      return "raw";
+    }
+    if (name === "table_cell") {
+      return "table-cell";
+    }
+  }
+  return "normal";
+}
+
+function inlineSlice(slice: Slice): Slice {
+  const first = slice.content.firstChild;
+  return slice.content.childCount === 1 && first?.isTextblock === true
+    ? new Slice(first.content, 0, 0)
+    : slice;
+}
+
+function inlineContent(slice: Slice, schema: Schema): Fragment {
+  const first = slice.content.firstChild;
+  if (slice.content.childCount === 1 && first?.isTextblock === true) {
+    return first.content;
+  }
+
+  const text = textFromSlice(slice);
+  return text.length > 0 ? Fragment.from(schema.text(text)) : Fragment.empty;
+}
+
+function textFromSlice(slice: Slice): string {
+  return slice.content.textBetween(0, slice.content.size, "\n", (node) =>
+    node.type.name === "raw_markdown_block" && typeof node.attrs.source === "string" ? node.attrs.source : ""
+  );
+}
+
+function replaceSelectionWithPlainText(
+  state: EditorState,
+  text: string,
+  dispatch: (transaction: Transaction) => void
+): boolean {
+  if (text.length === 0) {
+    return true;
+  }
+
+  const { from, to } = state.selection;
+  dispatch(state.tr.insertText(text, from, to));
+  return true;
+}
+
+function replaceSelectionWithInlineContent(
+  state: EditorState,
+  content: Fragment,
+  dispatch: (transaction: Transaction) => void
+): boolean {
+  dispatch(state.tr.replaceSelection(new Slice(content, 0, 0)));
+  return true;
 }

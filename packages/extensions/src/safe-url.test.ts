@@ -19,6 +19,9 @@ describe("safe URL policy", () => {
       "java&#x09;script:alert(1)",
       "java&NewLine;script:alert(1)",
       "j&amp;#x61;vascript:alert(1)",
+      "java\u200bscript:alert(1)",
+      "java\u00adscript:alert(1)",
+      "java\u2060script:alert(1)",
       " https://example.com"
     ]) {
       expect(isSafeUrl(value), value).toBe(false);

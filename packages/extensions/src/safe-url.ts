@@ -1,4 +1,4 @@
-const CONTROL_OR_WHITESPACE = /[\u0000-\u0020\u007f-\u009f\s]/u;
+const CONTROL_OR_WHITESPACE = /[\u0000-\u0020\u007f-\u009f\u00ad\u200b-\u200d\u2060\ufeff\s]/u;
 const ALLOWED_SCHEMES = new Set(["http", "https", "mailto"]);
 
 const NAMED_ENTITIES: Readonly<Record<string, string>> = {

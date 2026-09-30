@@ -40,12 +40,12 @@ PRUN-2026-09-0004: 기본 편집 경험과 안전한 HTML 붙여넣기 구현
 
 ## Acceptance Criteria
 
-- [ ] copy/cut에 예외 없고 raw/위험href clipboard DOM도 비실행.
-- [ ] inline/표셀/code paste에서 기존 텍스트/구조와 단일paragraph 유지.
-- [ ] 빈 HTML 안전 변환이 선택내용을 삭제하지 않고 평문 fallback 가능.
-- [ ] raw noneditable 및 View update/destroy 순서 회귀 통과.
-- [ ] 중첩표/drop/난독화URL 정책과 회귀 일치.
-- [ ] 전체 build/typecheck/test/diffcheck PASS.
+- [x] copy/cut에 예외 없고 raw/위험href clipboard DOM도 비실행.
+- [x] inline/표셀/code paste에서 기존 텍스트/구조와 단일paragraph 유지.
+- [x] 빈 HTML 안전 변환이 선택내용을 삭제하지 않고 평문 fallback 가능.
+- [x] raw noneditable 및 View update/destroy 순서 회귀 통과.
+- [x] 중첩표/drop/난독화URL 정책과 회귀 일치.
+- [x] 전체 build/typecheck/test/diffcheck PASS.
 
 ## Verify
 
@@ -55,4 +55,3 @@ pnpm typecheck
 pnpm test
 git diff --check
 ```
-
