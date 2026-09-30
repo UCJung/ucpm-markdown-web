@@ -18,7 +18,7 @@ const markdownExtension: Extension = {
     table_row: { content: "table_cell+" },
     table_cell: {
       attrs: { align: { default: null }, header: { default: false } },
-      content: "block+"
+      content: "paragraph"
     }
   },
   marks: { strikethrough: {} }

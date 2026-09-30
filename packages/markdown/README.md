@@ -24,6 +24,9 @@
 - Math: 독립된 `$$` 시작·종료 줄을 display math block으로 보존한다.
 - Directive: 독립된 `:::name` 시작과 `:::` 종료 줄을 directive block으로 보존한다.
 - Fence: fenced 또는 들여쓴 code block 내부의 `$$`·`:::`은 code로 유지한다.
-- Inline HTML·미식별 임의 문법은 raw 보존 대상이 아니며 조용히 유실하지 않고 오류를 반환한다.
+- 컨테이너: quote/list/table/문단에 raw 또는 미지원 inline이 포함되면 컨테이너 전체를 raw로 강등해 prefix와 전후 텍스트를 보존한다.
+- Inline HTML·image·reference 등 미지원 inline은 포함 블록 전체를 raw로 보존하며 시각 편집 기능을 추가하지 않는다.
+
+raw source 자체에는 개행을 추가하거나 제거하지 않는다. 문서 경계는 정규화 대상이며 마지막 블록이 raw이면 export 끝 개행을 추가하지 않고, 지원 블록이면 하나의 `\n`을 출력한다.
 
 raw source는 문자열일 뿐 HTML·DOM·스크립트로 렌더링하거나 실행하지 않는다. URL scheme의 DOM 안전 정책은 후속 어댑터 범위다.

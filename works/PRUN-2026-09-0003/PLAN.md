@@ -57,11 +57,12 @@ Markdown을 편집 문서로 import하고 GFM 지원 문법의 의미를 보존�
 |---------|------|---------|-------|---------|------------|----------|
 | TASK-01 | GFM 스키마와 Markdown import/export 구현 | 없음 | 1 | Must | FR-01, FR-02 | M |
 | TASK-02 | raw 원문 보존·정규화 fixture와 회귀 검증 | TASK-01 | 2 | Must | FR-02, FR-03, FR-04, NFR-01 | M |
+| TASK-03 | raw 변환 경계 결함 수정 | TASK-02 | 3 | Must | FR-01, FR-02, FR-03, FR-04, NFR-01 | M |
 
 ## Task 의존성 그래프
 
 ```text
-TASK-01 → TASK-02
+TASK-01 → TASK-02 → TASK-03
 ```
 
 ## 리스크 및 대응

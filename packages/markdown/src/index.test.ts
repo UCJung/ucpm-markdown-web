@@ -5,6 +5,7 @@ import {
   indentedCodeFixture,
   rawPreservationFixtures
 } from "./fixtures/raw-preservation.js";
+import { rawBoundaryFixtures } from "./fixtures/raw-boundaries.js";
 import { parseMarkdown, createMarkdownSchema, serializeMarkdown } from "./index.js";
 
 describe("Markdown GFM conversion", () => {
@@ -87,6 +88,58 @@ describe("Markdown GFM conversion", () => {
       expect(serializeMarkdown(document)).toBe(fixture.expectedExport);
     }
   });
+
+  it("falls back to the complete container source for nested and inline unsupported syntax", () => {
+    for (const source of [
+      rawBoundaryFixtures.blockquoteHtml,
+      rawBoundaryFixtures.listHtml,
+      rawBoundaryFixtures.inlineImage,
+      rawBoundaryFixtures.inlineHtml
+    ]) {
+      expectRawDocument(source);
+    }
+  });
+
+  it("falls back per block for unsupported inline references", () => {
+    const document = parseMarkdown(rawBoundaryFixtures.inlineReference);
+
+    expect(document.content.content.map((node) => node.type.name)).toEqual([
+      "raw_markdown_block",
+      "raw_markdown_block"
+    ]);
+    expect(document.content.content.map((node) => node.attrs.source)).toEqual([
+      "[reference text][ref]",
+      "[ref]: https://example.com"
+    ]);
+    expect(serializeMarkdown(document)).toBe("[reference text][ref]\n\n[ref]: https://example.com");
+  });
+
+  it("does not lose text when explicit raw ranges partially overlap Markdown blocks", () => {
+    expectRawDocument(rawBoundaryFixtures.rangePrefix);
+    expectRawDocument(rawBoundaryFixtures.rangeSuffix);
+  });
+
+  it("resets fence and raw detection at container boundaries", () => {
+    const quoteFenceDocument = parseMarkdown(rawBoundaryFixtures.quoteFenceThenDirective);
+    expect(quoteFenceDocument.lastChild?.type.name).toBe("raw_markdown_block");
+    expect(quoteFenceDocument.lastChild?.attrs.source).toBe(":::note\nraw\n:::");
+
+    const indentedFenceDocument = parseMarkdown(rawBoundaryFixtures.indentedFenceThenDirective);
+    expect(indentedFenceDocument.lastChild?.type.name).toBe("raw_markdown_block");
+    expect(indentedFenceDocument.lastChild?.attrs.source).toBe(":::note\nraw\n:::");
+
+    const unclosedQuoteDocument = parseMarkdown(rawBoundaryFixtures.quoteUnclosedThenDirective);
+    expect(unclosedQuoteDocument.lastChild?.type.name).toBe("raw_markdown_block");
+    expect(unclosedQuoteDocument.lastChild?.attrs.source).toBe(":::note\nraw\n:::");
+    expect(parseMarkdown(rawBoundaryFixtures.manyUnclosed).childCount).toBeGreaterThan(0);
+  });
+
+  it("restricts table cells to the serializer paragraph contract", () => {
+    const schema = createMarkdownSchema();
+    const paragraph = schema.node("paragraph", null, schema.text("cell"));
+
+    expect(() => schema.node("table_cell", null, [paragraph, paragraph])).toThrow();
+  });
 });
 
 function expectRoundTrip(source: string): void {
@@ -95,4 +148,14 @@ function expectRoundTrip(source: string): void {
   const reparsed = parseMarkdown(serialized);
 
   expect(reparsed.toJSON()).toEqual(parsed.toJSON());
+}
+
+function expectRawDocument(source: string): void {
+  const document = parseMarkdown(source);
+  const expectedRawSource = source.replace(/(\r\n|\n|\r)$/, "");
+
+  expect(document.childCount).toBe(1);
+  expect(document.firstChild?.type.name).toBe("raw_markdown_block");
+  expect(document.firstChild?.attrs.source).toBe(expectedRawSource);
+  expect(serializeMarkdown(document)).toBe(expectedRawSource);
 }

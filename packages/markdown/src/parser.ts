@@ -69,30 +69,27 @@ function parseRootChildren(
 
     const nodeRange = requireSourceRange(node, source, "Markdown block");
     const explicitRawRange = explicitRawRanges.find((range) => rangesOverlap(range, nodeRange));
-
-    if (node.type === "html") {
-      parsed.push(rawBlock(schema, source.slice(nodeRange.start, nodeRange.end)));
-      nodeIndex += 1;
-      continue;
-    }
-
     if (explicitRawRange !== undefined) {
-      const rawRange = containsRange(nodeRange, explicitRawRange) ? nodeRange : explicitRawRange;
-      parsed.push(rawBlock(schema, source.slice(rawRange.start, rawRange.end)));
-      nodeIndex = skipOverlappingNodes(nodes, nodeIndex + 1, rawRange, source);
+      const coverage = expandRawCoverage(nodes, nodeIndex, explicitRawRange, source);
+      parsed.push(rawBlock(schema, source.slice(coverage.range.start, coverage.range.end)));
+      nodeIndex = coverage.nextIndex;
       continue;
     }
 
-    if (isSupportedBlock(node.type)) {
-      parsed.push(parseBlock(node, schema));
-    } else {
-      parsed.push(rawBlock(schema, source.slice(nodeRange.start, nodeRange.end)));
-    }
-
+    parsed.push(parseBlockOrRaw(node, source, schema));
     nodeIndex += 1;
   }
 
   return parsed;
+}
+
+function parseBlockOrRaw(node: MarkdownNode, source: string, schema: Schema): ProseMirrorNode {
+  if (!isSupportedBlock(node.type) || containsUnsupportedSyntax(node)) {
+    const range = requireSourceRange(node, source, "Markdown block");
+    return rawBlock(schema, source.slice(range.start, range.end));
+  }
+
+  return parseBlock(node, schema);
 }
 
 function parseBlock(node: MarkdownNode, schema: Schema): ProseMirrorNode {
@@ -157,7 +154,7 @@ function parseInline(nodes: readonly MarkdownNode[], schema: Schema, marks: read
       case "link": return parseInline(requireChildren(node, node.type), schema, [...marks, schema.mark("link", { href: node.url ?? "", title: node.title ?? null })]);
       case "inlineCode": return textContent(schema, node.value ?? "", [...marks, schema.mark("code")]);
       case "break": return [schema.node("hard_break")];
-      case "html": throw new Error("Raw inline HTML preservation is not available until TASK-02.");
+      case "html": throw new Error("Unsupported inline HTML must be preserved by block fallback.");
       default: throw new Error(`Unsupported Markdown inline node: ${node.type}.`);
     }
   });
@@ -183,6 +180,32 @@ function requireHeadingLevel(node: MarkdownNode): number {
   return node.depth;
 }
 
+function containsUnsupportedSyntax(node: MarkdownNode): boolean {
+  switch (node.type) {
+    case "text":
+    case "break":
+    case "inlineCode":
+    case "thematicBreak":
+    case "code":
+      return false;
+    case "emphasis":
+    case "strong":
+    case "delete":
+    case "link":
+    case "paragraph":
+    case "heading":
+    case "blockquote":
+    case "list":
+    case "listItem":
+    case "table":
+    case "tableRow":
+    case "tableCell":
+      return requireChildren(node, node.type).some(containsUnsupportedSyntax);
+    default:
+      return true;
+  }
+}
+
 function isSupportedBlock(type: string): boolean {
   return ["paragraph", "heading", "blockquote", "thematicBreak", "list", "code", "table"].includes(type);
 }
@@ -206,37 +229,49 @@ function requireSourceRange(node: MarkdownNode, source: string, label: string): 
   return { start, end };
 }
 
-function skipOverlappingNodes(
+function expandRawCoverage(
   nodes: readonly MarkdownNode[],
   startIndex: number,
   range: SourceRange,
   source: string
-): number {
-  let index = startIndex;
+): { readonly range: SourceRange; readonly nextIndex: number } {
+  const first = nodes[startIndex];
+  if (first === undefined) {
+    throw new Error("Cannot expand raw coverage without a Markdown block.");
+  }
+
+  let coverage = unionRanges(requireSourceRange(first, source, "Markdown block"), range);
+  let index = startIndex + 1;
 
   while (index < nodes.length) {
     const next = nodes[index];
-    if (next === undefined || !rangesOverlap(requireSourceRange(next, source, "Markdown block"), range)) {
+    if (next === undefined) {
       break;
     }
+    const nextRange = requireSourceRange(next, source, "Markdown block");
+    if (!rangesOverlap(nextRange, coverage)) {
+      break;
+    }
+    coverage = unionRanges(coverage, nextRange);
     index += 1;
   }
 
-  return index;
+  return { range: coverage, nextIndex: index };
 }
 
 function rangesOverlap(left: SourceRange, right: SourceRange): boolean {
   return left.start < right.end && right.start < left.end;
 }
 
-function containsRange(container: SourceRange, content: SourceRange): boolean {
-  return container.start <= content.start && container.end >= content.end;
+function unionRanges(left: SourceRange, right: SourceRange): SourceRange {
+  return { start: Math.min(left.start, right.start), end: Math.max(left.end, right.end) };
 }
 
 function findExplicitRawRanges(source: string): readonly SourceRange[] {
   const lines = sourceLines(source);
   const ranges: SourceRange[] = [];
-  let fencedCode: string | undefined;
+  let fencedCode: { readonly marker: string; readonly container: string } | undefined;
+  let rawBlock: { readonly closing: string; readonly start: number; readonly container: string } | undefined;
 
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
@@ -244,53 +279,61 @@ function findExplicitRawRanges(source: string): readonly SourceRange[] {
       continue;
     }
 
+    const container = containerSignature(line.text);
     const content = containerContent(line.text);
-    const fence = codeFence(content);
-    if (fencedCode !== undefined) {
-      if (fence !== undefined && fence[0] === fencedCode[0] && fence.length >= fencedCode.length) {
-        fencedCode = undefined;
+    const fence = isIndentedContainerCode(line.text) ? undefined : codeFence(content);
+    let evaluateLine = true;
+
+    while (evaluateLine) {
+      evaluateLine = false;
+      if (fencedCode !== undefined) {
+        if (!sameFenceContainer(fencedCode.container, container)) {
+          fencedCode = undefined;
+          evaluateLine = true;
+          continue;
+        }
+        if (fence !== undefined && fence[0] === fencedCode.marker[0] && fence.length >= fencedCode.marker.length) {
+          fencedCode = undefined;
+        }
+        continue;
       }
-      continue;
-    }
-    if (fence !== undefined) {
-      fencedCode = fence;
-      continue;
-    }
-    if (isIndentedCode(line.text) || !isRawOpening(content)) {
-      continue;
-    }
 
-    const closingIndex = findRawClosingLine(lines, index + 1, content);
-    if (closingIndex === undefined) {
-      continue;
-    }
+      if (rawBlock !== undefined) {
+        if (!sameRawContainer(rawBlock.container, container, line.text)) {
+          rawBlock = undefined;
+          evaluateLine = true;
+          continue;
+        }
+        if (content.trim() === rawBlock.closing) {
+          ranges.push({ start: rawBlock.start, end: line.end });
+          rawBlock = undefined;
+          continue;
+        }
+        if (isRawOpening(content)) {
+          rawBlock = {
+            closing: rawClosing(content),
+            start: line.start,
+            container
+          };
+        }
+        continue;
+      }
 
-    const closing = lines[closingIndex];
-    if (closing === undefined) {
-      continue;
+      if (fence !== undefined) {
+        fencedCode = { marker: fence, container };
+        continue;
+      }
+      if (!isIndentedContainerCode(line.text) && isRawOpening(content)) {
+        rawBlock = { closing: rawClosing(content), start: line.start, container };
+      }
     }
-
-    ranges.push({ start: line.start, end: closing.end });
-    index = closingIndex;
   }
 
   return ranges;
 }
 
-function findRawClosingLine(lines: readonly SourceLine[], startIndex: number, opening: string): number | undefined {
-  const closing = opening === "$$" ? "$$" : ":::";
-
-  for (let index = startIndex; index < lines.length; index += 1) {
-    const line = lines[index];
-    if (line === undefined) {
-      continue;
-    }
-    if (containerContent(line.text).trim() === closing) {
-      return index;
-    }
-  }
-
-  return undefined;
+function rawClosing(opening: string): string {
+  return opening.trim() === "$$" ? "$$" : ":::";
 }
 
 function sourceLines(source: string): readonly SourceLine[] {
@@ -312,6 +355,10 @@ function sourceLines(source: string): readonly SourceLine[] {
 }
 
 function containerContent(line: string): string {
+  return unprefixedContainerContent(line).replace(/^ {1,3}/, "");
+}
+
+function unprefixedContainerContent(line: string): string {
   let content = line;
   let changed = true;
 
@@ -330,7 +377,32 @@ function containerContent(line: string): string {
     }
   }
 
-  return content.replace(/^ {1,3}/, "");
+  return content;
+}
+
+function containerSignature(line: string): string {
+  let content = line;
+  const signatures: string[] = [];
+  let changed = true;
+
+  while (changed) {
+    changed = false;
+    const quote = content.match(/^ {0,3}> ?/);
+    if (quote !== null) {
+      signatures.push(">");
+      content = content.slice(quote[0].length);
+      changed = true;
+      continue;
+    }
+    const list = content.match(/^ {0,3}(?:[-+*]|\d+[.)]) +(?:\[[ xX]\] +)?/);
+    if (list !== null) {
+      signatures.push("list");
+      content = content.slice(list[0].length);
+      changed = true;
+    }
+  }
+
+  return signatures.join("/");
 }
 
 function codeFence(content: string): string | undefined {
@@ -338,10 +410,21 @@ function codeFence(content: string): string | undefined {
   return match?.[1];
 }
 
-function isIndentedCode(line: string): boolean {
-  return /^(?: {4}|\t)/.test(line);
+function isIndentedContainerCode(line: string): boolean {
+  return /^(?: {4}|\t)/.test(unprefixedContainerContent(line));
 }
 
 function isRawOpening(content: string): boolean {
   return content.trim() === "$$" || /^:::[A-Za-z][\w-]*(?:[ \t].*)?$/.test(content.trim());
+}
+
+function sameFenceContainer(expected: string, actual: string): boolean {
+  return expected === actual;
+}
+
+function sameRawContainer(expected: string, actual: string, line: string): boolean {
+  if (expected === actual) {
+    return true;
+  }
+  return expected.endsWith("list") && actual.length === 0 && /^ {2,}/.test(line);
 }
