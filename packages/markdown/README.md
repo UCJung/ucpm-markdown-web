@@ -1,5 +1,15 @@
 # @uc-markdown-web/markdown
 
+`0.x` 실험 API 패키지임. 하위 호환성 보장 대상이 아니며, 실제 npm 게시 전 조직·패키지명·권한·라이선스 확정 필요.
+
+## 공개 진입점
+
+```ts
+import { createMarkdownSchema, parseMarkdown, serializeMarkdown } from "@uc-markdown-web/markdown";
+```
+
+`exports["."]`는 JavaScript `dist/index.js`와 타입 선언 `dist/index.d.ts`만 공개함.
+
 ## 변환 계약
 
 | 입력 범위 | import 결과 | export 기준 |
@@ -30,3 +40,10 @@
 raw source 자체에는 개행을 추가하거나 제거하지 않는다. 문서 경계는 정규화 대상이며 마지막 블록이 raw이면 export 끝 개행을 추가하지 않고, 지원 블록이면 하나의 `\n`을 출력한다.
 
 raw source는 문자열일 뿐 HTML·DOM·스크립트로 렌더링하거나 실행하지 않는다. URL scheme의 DOM 안전 정책은 후속 어댑터 범위다.
+
+## 로컬 검증
+
+```bash
+pnpm build
+node scripts/release/verify-pack.mjs
+```

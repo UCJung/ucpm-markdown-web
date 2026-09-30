@@ -2,6 +2,7 @@
   "name": "@uc-markdown-web/markdown",
   "version": "0.0.0",
   "private": true,
+  "description": "Experimental 0.x Markdown conversion layer for UC Markdown Web.",
   "type": "module",
   "exports": {
     ".": {
