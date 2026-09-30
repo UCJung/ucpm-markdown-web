@@ -38,12 +38,12 @@ PRUN-2026-09-0004: 기본 편집 경험과 안전한 HTML 붙여넣기 구현
 
 ## Acceptance Criteria
 
-- [ ] 허용 HTML이 문서 구조로 변환되고 Markdown으로 export 가능.
-- [ ] script·event·비허용 속성이 문서 모델·view DOM에 없음.
-- [ ] raw source는 텍스트로 표시되고 실행되지 않음.
-- [ ] Markdown 위험 href 원문은 유지되나 클릭 가능한 링크 DOM 없음.
-- [ ] entity/제어문자/공백으로 우회한 위험 URL도 탐색 불가.
-- [ ] `adapter-vanilla` 공개 mount API·playground 기능 변경 없음.
+- [x] 허용 HTML이 문서 구조로 변환되고 Markdown으로 export 가능.
+- [x] script·event·비허용 속성이 문서 모델·view DOM에 없음.
+- [x] raw source는 텍스트로 표시되고 실행되지 않음.
+- [x] Markdown 위험 href 원문은 유지되나 클릭 가능한 링크 DOM 없음.
+- [x] entity/제어문자/공백으로 우회한 위험 URL도 탐색 불가.
+- [x] `adapter-vanilla` 공개 mount API·playground 기능 변경 없음.
 
 ## Verify
 
