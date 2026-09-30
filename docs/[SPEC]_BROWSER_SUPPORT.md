@@ -5,7 +5,7 @@
 | 설명 | WYSIWYG Markdown 에디터의 지원 브라우저와 검증·접근성 기준 정의 |
 | 생성일 | 2026-09-30 |
 | 수정일 | 2026-09-30 |
-| 버전 | 0.1.0 |
+| 버전 | 0.1.1 |
 
 MVP는 Chrome, Edge, Firefox, Safari의 최신 메이저 버전과 직전 메이저 버전을 지원 대상으로 관리함.
 
@@ -69,17 +69,20 @@ Playwright Chromium과 WebKit 실행 결과는 각각 Chrome·Edge, Safari의 �
 
 | 항목 | 상태 | 기록 위치 |
 |---|---|---|
-| Chromium·Firefox·WebKit E2E | TASK-01 실행 결과 대기 | `tests/e2e/`, TASK-01 결과 |
-| axe·키보드 점검 | TASK-01 실행 결과 대기 | `tests/e2e/`, TASK-01 결과 |
+| Chromium E2E | Chromium `153.0.8010.12`, 독립 6/6 PASS | `tests/e2e/playground.spec.ts`, 릴리스 후보 증빙 |
+| Firefox E2E | Firefox `155.0`, 독립 6/6 PASS; Chromium·Firefox 전체 12건 PASS, 1.1분; 이전 동시 HMR 전체 timeout은 무효 | `tests/e2e/playground.spec.ts`, 릴리스 후보 증빙 |
+| WebKit E2E | Playwright WebKit revision `2359` 시작 FAIL; 실제 실행 브라우저 버전 확인 불가; `icuin77.dll`, `nghttp3.dll`, `jpeg62.dll`, `psl-5.dll` 탐색 실패 | 릴리스 후보 증빙 |
+| axe·키보드 점검 | 완료 엔진에서 axe critical·serious 0건, 키보드 시나리오 PASS; WebKit 미실행 | `tests/e2e/playground.spec.ts`, 릴리스 후보 증빙 |
 | 실제 Chrome·Edge·Firefox·Safari 최신·직전 버전 | 미실행 | 릴리스 후보 검증 결과 |
 
-실제 브라우저 버전과 수동·보조공학 검증이 미실행인 상태에서는 릴리스 후보 승인 근거로 사용 불가.
+WebKit 실패, 실제 브라우저 버전, 수동·보조공학 검증 미실행으로 현재 후보 상태는 `CANDIDATE BLOCKED`. 엔진 결과만으로 실제 브라우저 지원을 보증하지 않음.
 
 ## 참조 파일
 
 - `README.md` — workspace 패키지 경계와 검증 명령
 - `works/PRUN-2026-09-0006/Requirement.md` — FR-02, FR-03, NFR-02, NFR-03
 - `docs/guide/limitations.md` — 소비자 브라우저·접근성 제한
+- `docs/[NOTE]_RELEASE_CANDIDATE.md` — 엔진별 실행 결과·후보 차단 조건
 - [Playwright Browsers](https://playwright.dev/docs/browsers) — Playwright 브라우저 엔진 제공 범위
 
 ## 문서 갱신 이력
@@ -88,3 +91,4 @@ Playwright Chromium과 WebKit 실행 결과는 각각 Chrome·Edge, Safari의 �
 |---|---|---|
 | 0.1.0 | 2026-09-30 | 최근 2개 주요 버전 지원 정책과 Playwright·실제 브라우저 검증 기준 정의 |
 | 0.1.0 | 2026-09-30 | WCAG 목표·자동 차단 기준·이번 실행 미검증 범위 추가 |
+| 0.1.1 | 2026-09-30 | Chromium·Firefox 통과, WebKit 시작 실패와 후보 차단 상태 반영 |

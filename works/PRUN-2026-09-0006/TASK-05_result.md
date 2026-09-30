@@ -14,7 +14,7 @@
 
 ## 검증 결과
 - Builder/독립 Verifier: pnpm build, pnpm typecheck, pnpm test PASS.
-- 독립 개별 확인: markdown11/core17/extensions27/extension-api1 PASS.
+- 독립 개별 확인: markdown11/core17/extensions27/extension-api1/adapter5/playground1 = 62 PASS.
 - lint N/A; 검증 전후 git 상태 동일.
 
 ## 변경 파일
