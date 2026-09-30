@@ -24,6 +24,7 @@ export interface Editor {
   readonly commands: EditorCommands;
   readonly extensionCommands: Readonly<Record<string, () => boolean>>;
   getState(): EditorState;
+  isDestroyed(): boolean;
   dispatch(transaction: Transaction): boolean;
   subscribe(listener: EditorListener): () => void;
   destroy(): void;
@@ -65,6 +66,10 @@ class HeadlessEditor implements Editor {
 
   getState(): EditorState {
     return this.state;
+  }
+
+  isDestroyed(): boolean {
+    return this.destroyed;
   }
 
   /**
@@ -202,7 +207,7 @@ class HeadlessEditor implements Editor {
 }
 
 function createPlugins(extensions: readonly Extension[]): readonly Plugin[] {
-  const plugins: Plugin[] = [history(), keymap(baseKeymap)];
+  const plugins: Plugin[] = [history()];
 
   for (const extension of extensions) {
     plugins.push(...(extension.plugins ?? []));
@@ -211,6 +216,8 @@ function createPlugins(extensions: readonly Extension[]): readonly Plugin[] {
       plugins.push(keymap(extension.keymap));
     }
   }
+
+  plugins.push(keymap(baseKeymap));
 
   return plugins;
 }
