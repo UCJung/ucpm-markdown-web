@@ -1,0 +1,44 @@
+:root {
+  color: #172033;
+  background: #f5f7fb;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body { margin: 0; }
+
+.playground-shell {
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+.eyebrow { color: #52627d; font-size: .8rem; font-weight: 700; letter-spacing: .08em; margin: 0; text-transform: uppercase; }
+h1 { margin: .25rem 0; }
+h2 { font-size: 1rem; margin: 0 0 .75rem; }
+
+.controls, .workspace > div {
+  background: #fff;
+  border: 1px solid #dce3f0;
+  border-radius: .75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+label { display: block; font-size: .875rem; font-weight: 700; margin: .75rem 0 .35rem; }
+select, textarea, button { font: inherit; }
+select, textarea { border: 1px solid #afbdd3; border-radius: .4rem; padding: .5rem; width: 100%; }
+textarea { font-family: ui-monospace, monospace; resize: vertical; }
+button { background: #155eef; border: 0; border-radius: .4rem; color: #fff; cursor: pointer; margin-top: .55rem; padding: .5rem .75rem; }
+button:hover { background: #004eeb; }
+.button-row { display: flex; flex-wrap: wrap; gap: .5rem; }
+.button-row button { margin-top: 0; }
+
+.workspace { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); margin-top: 1rem; }
+.editor-surface { border: 1px solid #afbdd3; border-radius: .4rem; min-height: 24rem; padding: .75rem; }
+.editor-surface .ProseMirror { min-height: 22rem; outline: none; }
+pre { background: #101828; border-radius: .4rem; color: #e7edf8; margin: 0; min-height: 9rem; overflow: auto; padding: .75rem; white-space: pre-wrap; word-break: break-word; }
+.workspace h2 + pre { margin-bottom: 1rem; }
+
+@media (max-width: 760px) { .workspace { grid-template-columns: 1fr; } }

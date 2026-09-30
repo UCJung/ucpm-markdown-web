@@ -36,12 +36,12 @@ PRUN-2026-09-0005: Vanilla 어댑터와 편집기 playground
 
 ## Acceptance Criteria
 
-- [ ] 기존 Vite 빌드의 단일 `index.html`에서 UI 프레임워크 없이 Markdown 로드·시각 편집·조회가 동작한다.
-- [ ] 기본 블록·인라인 및 GFM 표·체크리스트·취소선·자동 링크 예제가 보인다.
-- [ ] 목록·표·코드 블록 등 기존 명령을 공개 어댑터 경유로 실행한다.
-- [ ] 허용 HTML paste 결과와 script·event handler·위험 URL 차단 결과를 편집 DOM과 Markdown 출력으로 확인한다.
-- [ ] 시나리오 변경 시 이전 인스턴스와 구독이 정리되어 중복 통지가 없다.
-- [ ] raw 전환·분할 화면은 추가하지 않는다.
+- [x] 기존 Vite 빌드의 단일 `index.html`에서 UI 프레임워크 없이 Markdown 로드·시각 편집·조회가 동작한다.
+- [x] 기본 블록·인라인 및 GFM 표·체크리스트·취소선·자동 링크 예제가 보인다.
+- [x] 목록·표·코드 블록 등 기존 명령을 공개 어댑터 경유로 실행한다.
+- [x] 허용 HTML paste 결과와 script·event handler·위험 URL 차단 결과를 편집 DOM과 Markdown 출력으로 확인한다.
+- [x] 시나리오 변경 시 이전 인스턴스와 구독이 정리되어 중복 통지가 없다.
+- [x] raw 전환·분할 화면은 추가하지 않는다.
 
 ## Verify
 
