@@ -12,7 +12,13 @@ const baseNodeSpecs: Record<string, NodeSpec> = {
   },
   blockquote: { content: "block+", group: "block" },
   horizontal_rule: { group: "block" },
-  code_block: { content: "text*", group: "block", marks: "", code: true },
+  code_block: {
+    attrs: { language: { default: null } },
+    content: "text*",
+    group: "block",
+    marks: "",
+    code: true
+  },
   bullet_list: { content: "list_item+", group: "block" },
   ordered_list: {
     attrs: { order: { default: 1 } },

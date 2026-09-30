@@ -8,7 +8,14 @@ export default defineConfig({
       fileName: "index"
     },
     rollupOptions: {
-      external: ["@uc-markdown-web/core"]
+      external: [
+        "@uc-markdown-web/core",
+        "prosemirror-model",
+        "remark-gfm",
+        "remark-parse",
+        "remark-stringify",
+        "unified"
+      ]
     }
   }
 });
