@@ -5,6 +5,7 @@
 > Executor: Codex orchestrator · Claude CLI headless · claude 2.1.266
 > Base: 8b2054cd0a3d857e7ffbd289f6e4a3e5ad2d0677
 > Head: 4aac1c252c8b16d98271d5cff5d7e5263d5fc94f
+> Fix-Head: dc9c38f9deff9cb7ef1de650fff15435a5d5ab4c
 > Range: 8b2054cd0a3d857e7ffbd289f6e4a3e5ad2d0677..4aac1c252c8b16d98271d5cff5d7e5263d5fc94f
 > Verdict: needs-attention
 > Findings: Critical 0 / High 3 / Medium 6 / Low 7
@@ -80,4 +81,7 @@ jsdom 테스트는 `handleTextInput`을 직접 호출하고 실제 DOM 변경/Mu
 
 ## 반영
 
-후속 TASK 실수정 예정.
+- TASK-04 (`b2d256e`): High 입력 규칙 2건 및 목록 키맵·표 속성·의존성 경계를 수정했다.
+- TASK-05 (`dc9c38f`): High clipboard 직렬화 및 관련 paste/raw/lifecycle/drop/URL 경계를 수정했다.
+- 독립 verifier build/typecheck/test 56건/diffcheck PASS. 실제 브라우저 검증은 REQ-0006에 인계한다.
+- 교차검증은 최초 1회 결과를 유지한다.
