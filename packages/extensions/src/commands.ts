@@ -1,4 +1,5 @@
 import type { ExtensionCommand } from "@uc-markdown-web/extension-api";
+import type { Node as ProseMirrorNode } from "prosemirror-model";
 import { wrapInList } from "prosemirror-schema-list";
 import { TextSelection, type EditorState } from "prosemirror-state";
 
@@ -47,7 +48,11 @@ export function addTableRow(): ExtensionCommand { return ({ state, dispatch }) =
   const row = state.schema.nodes.table_row; const cell = state.schema.nodes.table_cell; const paragraph = state.schema.nodes.paragraph;
   const count = rectangularTableWidth(found.node);
   if (!row || !cell || !paragraph || count < 1) return false;
-  dispatch(state.tr.insert(found.position + found.node.nodeSize - 1, row.create(null, Array.from({ length: count }, () => cell.create(null, paragraph.create()))))); return true;
+  const templateRow = found.node.firstChild;
+  dispatch(state.tr.insert(found.position + found.node.nodeSize - 1, row.create(null, Array.from({ length: count }, (_value, index) => {
+    const template = templateRow?.child(index);
+    return cell.create({ header: false, align: template?.attrs.align ?? null }, paragraph.create());
+  })))); return true;
 }; }
 export function addTableCell(): ExtensionCommand { return ({ state, dispatch }) => {
   const found = ancestor(state, "table"); if (found === undefined) return false;
@@ -63,11 +68,13 @@ export function addTableCell(): ExtensionCommand { return ({ state, dispatch }) 
   for (let index = inserts.length - 1; index >= 0; index -= 1) {
     const position = inserts[index];
     if (position === undefined) return false;
-    transaction = transaction.insert(position, cell.create({ header: index === 0 }, paragraph.create()));
+    const row = found.node.child(index);
+    const template = row.lastChild;
+    transaction = transaction.insert(position, cell.create({ header: template?.attrs.header === true, align: template?.attrs.align ?? null }, paragraph.create()));
   }
   dispatch(transaction); return true;
 }; }
-function rectangularTableWidth(table: { readonly childCount: number; child(index: number): { readonly type: { readonly name: string }; readonly childCount: number } }): number {
+function rectangularTableWidth(table: ProseMirrorNode): number {
   if (table.childCount < 1) return 0;
   const width = table.child(0).childCount;
   if (width < 1) return 0;

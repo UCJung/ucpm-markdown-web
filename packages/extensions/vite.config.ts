@@ -17,7 +17,6 @@ export default defineConfig({
         "prosemirror-model",
         "prosemirror-schema-list",
         "prosemirror-state",
-        "prosemirror-tables",
         "prosemirror-view"
       ]
     }

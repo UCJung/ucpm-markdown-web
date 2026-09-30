@@ -18,7 +18,7 @@ export function createEditingExtension(): Extension {
 
 export { addTableCell, addTableRow, convertSelectionToCodeBlock, insertTable, setCursor, setSelection, wrapSelectionInList } from "./commands.js";
 export { createMarkdownInputRules } from "./input-rules.js";
-export { editingKeymap } from "./keymap.js";
+export { createEditingKeymap, editingKeymap } from "./keymap.js";
 export { createSafePastePlugin, parsePastedHtml, unsupportedPasteContentPolicy } from "./paste.js";
 export { decodeUrlEntities, isSafeUrl } from "./safe-url.js";
 export { createSafeEditorView } from "./safe-view.js";

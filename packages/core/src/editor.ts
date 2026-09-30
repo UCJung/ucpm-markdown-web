@@ -202,7 +202,7 @@ class HeadlessEditor implements Editor {
 }
 
 function createPlugins(extensions: readonly Extension[]): readonly Plugin[] {
-  const plugins: Plugin[] = [history(), keymap(baseKeymap)];
+  const plugins: Plugin[] = [history()];
 
   for (const extension of extensions) {
     plugins.push(...(extension.plugins ?? []));
@@ -211,6 +211,8 @@ function createPlugins(extensions: readonly Extension[]): readonly Plugin[] {
       plugins.push(keymap(extension.keymap));
     }
   }
+
+  plugins.push(keymap(baseKeymap));
 
   return plugins;
 }

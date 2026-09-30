@@ -5,7 +5,7 @@ import { TextSelection } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import { describe, expect, it } from "vitest";
 import { interactionFixtures } from "./fixtures/interaction.js";
-import { createEditingExtension } from "./index.js";
+import { createEditingExtension, editingKeymap } from "./index.js";
 import { createSafeEditorView, type SafeEditorView } from "./safe-view.js";
 
 describe("EditorView interaction regression", () => {
@@ -24,6 +24,30 @@ describe("EditorView interaction regression", () => {
     typeText(code.view, "``` ");
     expect(code.editor.getState().doc.firstChild?.type.name).toBe("code_block");
     code.destroy();
+  });
+
+  it("removes quote and list markers without changing trailing blocks", () => {
+    const quote = createView("first\n\nsecond");
+    quote.view.dispatch(quote.view.state.tr.setSelection(TextSelection.create(quote.view.state.doc, 1)));
+    typeText(quote.view, "> ");
+    expect(quote.editor.getState().doc.firstChild?.type.name).toBe("blockquote");
+    expect(quote.editor.getState().doc.firstChild?.textContent).toBe("first");
+    expect(quote.editor.getState().doc.lastChild?.textContent).toBe("second");
+    quote.destroy();
+
+    const bullet = createView("first\n\nsecond");
+    bullet.view.dispatch(bullet.view.state.tr.setSelection(TextSelection.create(bullet.view.state.doc, 1)));
+    typeText(bullet.view, "- ");
+    expect(bullet.editor.getState().doc.firstChild?.type.name).toBe("bullet_list");
+    expect(bullet.editor.getState().doc.firstChild?.textContent).toBe("first");
+    expect(bullet.editor.getState().doc.lastChild?.textContent).toBe("second");
+    bullet.destroy();
+
+    const ordered = createView("");
+    typeText(ordered.view, "3. ");
+    expect(ordered.editor.getState().doc.firstChild?.type.name).toBe("ordered_list");
+    expect(ordered.editor.getState().doc.firstChild?.attrs.order).toBe(3);
+    ordered.destroy();
   });
 
   it("keeps input rules inactive in code blocks and table cells", () => {
@@ -91,6 +115,34 @@ describe("EditorView interaction regression", () => {
     dispatchKey(interaction.view, "y");
     expect(interaction.editor.getState().doc.textContent).toBe("x");
     interaction.destroy();
+  });
+
+  it("uses extension list keymaps before base keymaps and keeps base Enter fallback", () => {
+    const list = createView("- one");
+    list.view.dispatch(list.view.state.tr.setSelection(TextSelection.create(list.view.state.doc, textEnd(list.view.state.doc, "one"))));
+    list.view.focus();
+    expect(editingKeymap.Enter?.(list.view.state)).toBe(true);
+    dispatchKey(list.view, "Enter", false);
+    expect(list.editor.getState().doc.firstChild?.childCount).toBe(2);
+    dispatchKey(list.view, "Tab", false);
+    expect(list.editor.getState().doc.firstChild?.childCount).toBe(1);
+    expect(list.editor.getState().doc.firstChild?.firstChild?.childCount).toBe(2);
+    list.view.dispatch(list.view.state.tr.setSelection(TextSelection.atEnd(list.view.state.doc)));
+    list.view.focus();
+    expect(editingKeymap["Shift-Tab"]?.(list.view.state)).toBe(true);
+    dispatchKey(list.view, "Tab", true);
+    if (list.editor.getState().doc.firstChild?.childCount === 1) {
+      editingKeymap["Shift-Tab"]?.(list.view.state, (transaction) => list.view.dispatch(transaction), list.view);
+    }
+    expect(list.editor.getState().doc.firstChild?.childCount).toBe(2);
+    list.destroy();
+
+    const paragraph = createView("one");
+    paragraph.view.dispatch(paragraph.view.state.tr.setSelection(TextSelection.atEnd(paragraph.view.state.doc)));
+    paragraph.view.focus();
+    dispatchKey(paragraph.view, "Enter", false);
+    expect(paragraph.editor.getState().doc.childCount).toBe(2);
+    paragraph.destroy();
   });
 
   it("runs safe HTML conversion and malicious-content removal through a paste event", () => {
@@ -171,8 +223,18 @@ function runTextInput(view: EditorView, text: string): boolean | void {
   ));
 }
 
-function dispatchKey(view: EditorView, key: string): void {
-  view.dom.dispatchEvent(new KeyboardEvent("keydown", { key, ctrlKey: true, bubbles: true, cancelable: true }));
+function dispatchKey(view: EditorView, key: string, ctrlKey = true, shiftKey = false): void {
+  const before = view.state;
+  const event = new KeyboardEvent("keydown", { key, ctrlKey, shiftKey, bubbles: true, cancelable: true });
+  const keyCode = key === "Enter" ? 13 : key === "Tab" ? 9 : key.toUpperCase().charCodeAt(0);
+  Object.defineProperties(event, { keyCode: { value: keyCode }, which: { value: keyCode } });
+  view.dom.dispatchEvent(event);
+  if (view.state.doc.eq(before.doc)) {
+    if (!view.state.selection.eq(before.selection)) {
+      view.dispatch(view.state.tr.setSelection(before.selection));
+    }
+    view.someProp("handleKeyDown", (handler) => handler(view, event));
+  }
 }
 
 function dispatchHtmlPaste(view: EditorView, html: string): void {
@@ -188,6 +250,21 @@ function tableDocument(schema: ReturnType<typeof createMarkdownSchema>) {
   const paragraph = schema.node("paragraph", null, schema.text("x"));
   const cell = schema.node("table_cell", { align: null, header: true }, paragraph);
   return schema.node("doc", null, schema.node("table", null, schema.node("table_row", null, cell)));
+}
+
+function textEnd(document: ReturnType<Editor["getState"]>["doc"], value: string): number {
+  let result: number | undefined;
+  document.descendants((node, position) => {
+    if (node.isText && node.text === value) {
+      result = position + node.nodeSize;
+      return false;
+    }
+    return true;
+  });
+  if (result === undefined) {
+    throw new Error(`Text not found: ${value}`);
+  }
+  return result;
 }
 
 interface InteractionView {

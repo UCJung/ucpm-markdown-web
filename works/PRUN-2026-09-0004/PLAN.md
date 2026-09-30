@@ -58,11 +58,13 @@
 | TASK-01 | 입력 규칙·선택·목록/표/코드 명령 구현 | 없음 | 1 | Must | FR-01, FR-02, NFR-02 | M |
 | TASK-02 | 안전 view·HTML 붙여넣기 정규화 구현 | TASK-01 | 2 | Must | FR-03, FR-04, NFR-01 | M |
 | TASK-03 | 실제 편집 상호작용·보안 회귀 테스트 | TASK-01, TASK-02 | 3 | Must | FR-01~05, NFR-01, NFR-02 | M |
+| TASK-04 | 입력규칙 매핑·목록 키보드 결함 수정 | TASK-03 | 4 | Must | FR-01, FR-02, FR-05 | M |
+| TASK-05 | 안전 클립보드·View·paste 경계 수정 | TASK-04 | 5 | Must | FR-03~05, NFR-01, NFR-02 | M |
 
 ## Task 의존성 그래프
 
 ```text
-TASK-01 → TASK-02 → TASK-03
+TASK-01 → TASK-02 → TASK-03 → TASK-04 → TASK-05
 ```
 
 ## 리스크 및 대응

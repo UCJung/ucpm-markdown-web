@@ -21,3 +21,24 @@ extensions 내부 View를 구현한다. raw는 텍스트 node, 위험 href는 �
 ### 결정주체
 auto
 
+## D-02
+> 시각: 2026-09-30 08:22:04 UTC
+> 단계: codex
+> 상태: RESOLVED
+
+### 배경
+Claude High3/Medium6/Low7 확인.
+
+### 선택지
+1. 입력/키보드와 View/paste 경계로 후속 TASK 2개를 분리해 실수정.
+2. 결함 기록만 수행.
+
+### 권고안
+1번 — 입력손상·복사실패 및 연결된 데이터보존/생명주기 경계 해소.
+
+### 확정값
+TASK04로 High 입력규칙2건 및 목록키맵을 수정한다. TASK05로 High clipboard 및 관련 paste/raw/reentrant/destroy Medium을 수정한다. 같은 파일의 명백한 Low(header/ordered/unuseddep/nestedtable/drop/URL)도 포함한다. 위험도가 큰 core 재진입 정책 변경 대신 view 경계 방어를 우선한다. 교차검증 재실행 없음.
+
+### 결정주체
+auto
+
