@@ -17,6 +17,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@uc-markdown-web/extension-api": "workspace:*"
+    "@uc-markdown-web/extension-api": "workspace:*",
+    "prosemirror-model": "^1.25.12"
   }
 }
