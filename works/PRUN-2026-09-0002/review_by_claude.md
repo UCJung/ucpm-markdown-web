@@ -5,6 +5,7 @@
 > Executor: Codex orchestrator · Claude CLI headless · claude 2.1.266
 > Base: f2d1486dc25750e3b73dead9e93dad6f16a28c5e
 > Head: 0d7016d843f0209cc1ec9e2de35f35cc2b1f0025
+> Fix-Head: 6d2ec3f39742b404a55bb5931e556ee046f966a5
 > Range: f2d1486dc25750e3b73dead9e93dad6f16a28c5e..0d7016d843f0209cc1ec9e2de35f35cc2b1f0025
 > Verdict: needs-attention
 > Findings: Critical 0 / High 1 / Medium 4 / Low 6
@@ -65,5 +66,4 @@ PLAN.md는 "나머지 callback을 계속 실행한 뒤 오류를 집계해 반�
 
 ## 반영
 
-후속 TASK 실수정 예정.
-
+TASK-03 실수정 완료. High 명령 반환 계약, 외부 schema 병합, 초기 top node 검증 보완. 독립 verifier 전체 19건 PASS. listener snapshot 정책 유지 및 적용 후 오류 계약 명시. 나머지 권고 기록만 유지.
