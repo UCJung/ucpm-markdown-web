@@ -34,12 +34,12 @@ PRUN-2026-09-0001: WYSIWYG Markdown 에디터 모노레포 기반 구성
 
 ## Acceptance Criteria
 
-- [ ] 6개 패키지 책임·진입점·허용 의존성이 README와 manifest에서 일치.
-- [ ] Chrome·Edge·Firefox·Safari 최근 2개 주요 버전이 문서에 명시.
-- [ ] Playwright 엔진 검증과 실제 브라우저 버전 지원 정책의 차이 및 REQ-2026-09-0006 후속 검증 연결 확인.
-- [ ] 공개 진입점 소비 smoke test가 workspace `pnpm test`에 포함.
-- [ ] `pnpm build`, `pnpm typecheck`, `pnpm test` 통과.
-- [ ] 기존 미추적 기획문서 3개 내용 유지.
+- [x] 6개 패키지 책임·진입점·허용 의존성이 README와 manifest에서 일치.
+- [x] Chrome·Edge·Firefox·Safari 최근 2개 주요 버전이 문서에 명시.
+- [x] Playwright 엔진 검증과 실제 브라우저 버전 지원 정책의 차이 및 REQ-2026-09-0006 후속 검증 연결 확인.
+- [x] 공개 진입점 소비 smoke test가 workspace `pnpm test`에 포함.
+- [x] `pnpm build`, `pnpm typecheck`, `pnpm test` 통과.
+- [x] 기존 미추적 기획문서 3개 내용 유지.
 
 ## Verify
 
