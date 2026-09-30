@@ -33,12 +33,12 @@ PRUN-2026-09-0005: Vanilla 어댑터와 편집기 playground
 
 ## Acceptance Criteria
 
-- [ ] 대상 `HTMLElement` mount와 destroy 뒤 편집 DOM 제거를 검증한다.
-- [ ] 초기/수정 Markdown 및 기본·GFM·raw 의미 보존을 검증한다.
-- [ ] 문서 변경 구독·해제와 선택 영역만 변경한 트랜잭션의 무통지를 검증한다.
-- [ ] 목록·표·코드 블록 명령의 Markdown 결과를 검증한다.
-- [ ] destroy 뒤 기존 DOM 이벤트와 core 변경 시도에서 구독 통지·상태 변경이 없음을 검증한다.
-- [ ] 허용 HTML 및 script·event handler·위험 URL paste가 기존 안전 정책을 통과함을 검증한다.
+- [x] 대상 `HTMLElement` mount와 destroy 뒤 편집 DOM 제거를 검증한다.
+- [x] 초기/수정 Markdown 및 기본·GFM·raw 의미 보존을 검증한다.
+- [x] 문서 변경 구독·해제와 선택 영역만 변경한 트랜잭션의 무통지를 검증한다.
+- [x] 목록·표·코드 블록 명령의 Markdown 결과를 검증한다.
+- [x] destroy 뒤 기존 DOM 이벤트와 core 변경 시도에서 구독 통지·상태 변경이 없음을 검증한다.
+- [x] 허용 HTML 및 script·event handler·위험 URL paste가 기존 안전 정책을 통과함을 검증한다.
 
 ## Verify
 
