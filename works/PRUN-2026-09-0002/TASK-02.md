@@ -45,13 +45,13 @@ PRUN-2026-09-0002: 프레임워크 중립 편집 코어와 확장 API 구현
 
 ## Acceptance Criteria
 
-- [ ] React/Vue·DOM 없이 편집기 생성, transaction 적용, 명령 실행, 상태 구독, 정리 가능.
-- [ ] 명령·구독·undo/redo·keymap 구성 테스트 통과.
-- [ ] 확장 생성·역순 정리·생성 실패 cleanup 테스트 통과.
-- [ ] 재진입, listener/hook 오류, 중복 해제·destroy, 종료 후 명령의 동작 테스트 통과.
-- [ ] `pnpm install --frozen-lockfile` 직후 `pnpm typecheck` 및 `pnpm test`를 각각 단독 실행 가능.
-- [ ] core/extension-api의 새 소스·테스트·설정 파일이 타입검사에 포함되고 선언 빌드에 테스트 파일 미포함.
-- [ ] Markdown 변환과 Vanilla DOM mount 기능 미구현.
+- [x] React/Vue·DOM 없이 편집기 생성, transaction 적용, 명령 실행, 상태 구독, 정리 가능.
+- [x] 명령·구독·undo/redo·keymap 구성 테스트 통과.
+- [x] 확장 생성·역순 정리·생성 실패 cleanup 테스트 통과.
+- [x] 재진입, listener/hook 오류, 중복 해제·destroy, 종료 후 명령의 동작 테스트 통과.
+- [x] `pnpm install --frozen-lockfile` 직후 `pnpm typecheck` 및 `pnpm test`를 각각 단독 실행 가능.
+- [x] core/extension-api의 새 소스·테스트·설정 파일이 타입검사에 포함되고 선언 빌드에 테스트 파일 미포함.
+- [x] Markdown 변환과 Vanilla DOM mount 기능 미구현.
 
 ## Verify
 
