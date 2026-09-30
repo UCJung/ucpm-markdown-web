@@ -5,6 +5,7 @@
 > Executor: Codex orchestrator · Claude CLI headless · claude 2.1.266
 > Base: 468734e515c9261355d547a7f141c12d8e541afe
 > Head: 2d87c4646088c8001e25526b8cf63a5674452b6a
+> Fix-Head: 62a7d48ed5235219420a335b3d897881b64c882c
 > Range: 468734e515c9261355d547a7f141c12d8e541afe..2d87c4646088c8001e25526b8cf63a5674452b6a
 > Verdict: needs-attention
 > Findings: Critical 0 / High 2 / Medium 4 / Low 4
@@ -109,5 +110,6 @@ GFM Markdown import/export와 raw 블록 원문 보존 구현(packages/markdown 
 
 ## 반영
 
-후속 TASK 실수정 예정.
+TASK-03에서 High 2건 및 관련 parser Medium 4건을 수정했다. 컨테이너 HTML/미지원 inline fallback, overlap 전후 텍스트 보존, 선형 raw/fence 상태기, table_cell 단일 paragraph 계약을 회귀 테스트로 검증했다. raw 포함 컨테이너 전체 강등과 마지막 raw 개행 규칙을 README에 명시했다.
 
+독립 verifier: build/typecheck/test 29건 PASS. 나머지 Low는 기록만. 교차검증 재실행 없음.
