@@ -4,6 +4,11 @@ const markdownExtension: Extension = {
   name: "markdown-gfm",
   nodes: {
     hard_break: { inline: true, group: "inline", selectable: false },
+    raw_markdown_block: {
+      attrs: { source: {} },
+      group: "block",
+      atom: true
+    },
     task_list: { content: "task_item+", group: "block" },
     task_item: {
       attrs: { checked: { default: false } },

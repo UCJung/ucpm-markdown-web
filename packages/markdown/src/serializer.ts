@@ -15,7 +15,20 @@ export function serializeMarkdown(document: ProseMirrorNode): string {
     throw new Error("serializeMarkdown expects a doc node.");
   }
 
-  return stringifier.stringify({ type: "root", children: document.content.content.map(serializeBlock) } as never);
+  const blocks = document.content.content;
+  const lastBlock = blocks.at(-1);
+  const output = blocks.map(serializeDocumentBlock).join("\n\n");
+
+  return lastBlock?.type.name === "raw_markdown_block" ? output : `${output}\n`;
+}
+
+function serializeDocumentBlock(node: ProseMirrorNode): string {
+  if (node.type.name === "raw_markdown_block") {
+    return requiredString(node.attrs.source, "raw_markdown_block source");
+  }
+
+  const output = stringifier.stringify({ type: "root", children: [serializeBlock(node)] } as never);
+  return output.replace(/(\r\n|\n|\r)$/, "");
 }
 
 function serializeBlock(node: ProseMirrorNode): MarkdownNode {

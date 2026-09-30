@@ -8,6 +8,7 @@ import { createMarkdownSchema } from "./schema.js";
 interface MarkdownNode {
   readonly type: string;
   readonly children?: readonly MarkdownNode[];
+  readonly position?: SourcePosition;
   readonly value?: string;
   readonly depth?: number;
   readonly url?: string;
@@ -19,11 +20,25 @@ interface MarkdownNode {
   readonly align?: readonly ("left" | "right" | "center" | null)[];
 }
 
+interface SourcePosition {
+  readonly start?: { readonly offset?: number };
+  readonly end?: { readonly offset?: number };
+}
+
+interface SourceRange {
+  readonly start: number;
+  readonly end: number;
+}
+
+interface SourceLine extends SourceRange {
+  readonly text: string;
+}
+
 const parser = unified().use(remarkParse).use(remarkGfm);
 
 export function parseMarkdown(source: string, schema: Schema = createMarkdownSchema()): ProseMirrorNode {
   const root = parser.parse(source) as unknown as MarkdownNode;
-  const children = requireChildren(root, "root").map((node) => parseBlock(node, schema));
+  const children = parseRootChildren(requireChildren(root, "root"), source, schema);
 
   if (children.length === 0) {
     const emptyDocument = schema.topNodeType.createAndFill();
@@ -35,6 +50,49 @@ export function parseMarkdown(source: string, schema: Schema = createMarkdownSch
   }
 
   return schema.node("doc", null, children);
+}
+
+function parseRootChildren(
+  nodes: readonly MarkdownNode[],
+  source: string,
+  schema: Schema
+): ProseMirrorNode[] {
+  const explicitRawRanges = findExplicitRawRanges(source);
+  const parsed: ProseMirrorNode[] = [];
+  let nodeIndex = 0;
+
+  while (nodeIndex < nodes.length) {
+    const node = nodes[nodeIndex];
+    if (node === undefined) {
+      break;
+    }
+
+    const nodeRange = requireSourceRange(node, source, "Markdown block");
+    const explicitRawRange = explicitRawRanges.find((range) => rangesOverlap(range, nodeRange));
+
+    if (node.type === "html") {
+      parsed.push(rawBlock(schema, source.slice(nodeRange.start, nodeRange.end)));
+      nodeIndex += 1;
+      continue;
+    }
+
+    if (explicitRawRange !== undefined) {
+      const rawRange = containsRange(nodeRange, explicitRawRange) ? nodeRange : explicitRawRange;
+      parsed.push(rawBlock(schema, source.slice(rawRange.start, rawRange.end)));
+      nodeIndex = skipOverlappingNodes(nodes, nodeIndex + 1, rawRange, source);
+      continue;
+    }
+
+    if (isSupportedBlock(node.type)) {
+      parsed.push(parseBlock(node, schema));
+    } else {
+      parsed.push(rawBlock(schema, source.slice(nodeRange.start, nodeRange.end)));
+    }
+
+    nodeIndex += 1;
+  }
+
+  return parsed;
 }
 
 function parseBlock(node: MarkdownNode, schema: Schema): ProseMirrorNode {
@@ -53,8 +111,6 @@ function parseBlock(node: MarkdownNode, schema: Schema): ProseMirrorNode {
       return schema.node("code_block", { language: node.lang ?? null }, textContent(schema, node.value ?? ""));
     case "table":
       return parseTable(node, schema);
-    case "html":
-      throw new Error("Raw HTML preservation is not available until TASK-02.");
     default:
       throw new Error(`Unsupported Markdown block: ${node.type}.`);
   }
@@ -125,4 +181,167 @@ function requireHeadingLevel(node: MarkdownNode): number {
   }
 
   return node.depth;
+}
+
+function isSupportedBlock(type: string): boolean {
+  return ["paragraph", "heading", "blockquote", "thematicBreak", "list", "code", "table"].includes(type);
+}
+
+function rawBlock(schema: Schema, source: string): ProseMirrorNode {
+  if (source.length === 0) {
+    throw new Error("raw_markdown_block source must not be empty.");
+  }
+
+  return schema.node("raw_markdown_block", { source });
+}
+
+function requireSourceRange(node: MarkdownNode, source: string, label: string): SourceRange {
+  const start = node.position?.start?.offset;
+  const end = node.position?.end?.offset;
+
+  if (start === undefined || end === undefined || start < 0 || end < start || end > source.length) {
+    throw new Error(`${label} is missing a valid source position.`);
+  }
+
+  return { start, end };
+}
+
+function skipOverlappingNodes(
+  nodes: readonly MarkdownNode[],
+  startIndex: number,
+  range: SourceRange,
+  source: string
+): number {
+  let index = startIndex;
+
+  while (index < nodes.length) {
+    const next = nodes[index];
+    if (next === undefined || !rangesOverlap(requireSourceRange(next, source, "Markdown block"), range)) {
+      break;
+    }
+    index += 1;
+  }
+
+  return index;
+}
+
+function rangesOverlap(left: SourceRange, right: SourceRange): boolean {
+  return left.start < right.end && right.start < left.end;
+}
+
+function containsRange(container: SourceRange, content: SourceRange): boolean {
+  return container.start <= content.start && container.end >= content.end;
+}
+
+function findExplicitRawRanges(source: string): readonly SourceRange[] {
+  const lines = sourceLines(source);
+  const ranges: SourceRange[] = [];
+  let fencedCode: string | undefined;
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (line === undefined) {
+      continue;
+    }
+
+    const content = containerContent(line.text);
+    const fence = codeFence(content);
+    if (fencedCode !== undefined) {
+      if (fence !== undefined && fence[0] === fencedCode[0] && fence.length >= fencedCode.length) {
+        fencedCode = undefined;
+      }
+      continue;
+    }
+    if (fence !== undefined) {
+      fencedCode = fence;
+      continue;
+    }
+    if (isIndentedCode(line.text) || !isRawOpening(content)) {
+      continue;
+    }
+
+    const closingIndex = findRawClosingLine(lines, index + 1, content);
+    if (closingIndex === undefined) {
+      continue;
+    }
+
+    const closing = lines[closingIndex];
+    if (closing === undefined) {
+      continue;
+    }
+
+    ranges.push({ start: line.start, end: closing.end });
+    index = closingIndex;
+  }
+
+  return ranges;
+}
+
+function findRawClosingLine(lines: readonly SourceLine[], startIndex: number, opening: string): number | undefined {
+  const closing = opening === "$$" ? "$$" : ":::";
+
+  for (let index = startIndex; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (line === undefined) {
+      continue;
+    }
+    if (containerContent(line.text).trim() === closing) {
+      return index;
+    }
+  }
+
+  return undefined;
+}
+
+function sourceLines(source: string): readonly SourceLine[] {
+  const lines: SourceLine[] = [];
+  const matcher = /\r\n|\n|\r/g;
+  let start = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = matcher.exec(source)) !== null) {
+    lines.push({ start, end: match.index, text: source.slice(start, match.index) });
+    start = matcher.lastIndex;
+  }
+
+  if (start < source.length) {
+    lines.push({ start, end: source.length, text: source.slice(start) });
+  }
+
+  return lines;
+}
+
+function containerContent(line: string): string {
+  let content = line;
+  let changed = true;
+
+  while (changed) {
+    changed = false;
+    const quote = content.match(/^ {0,3}> ?/);
+    if (quote !== null) {
+      content = content.slice(quote[0].length);
+      changed = true;
+      continue;
+    }
+    const list = content.match(/^ {0,3}(?:[-+*]|\d+[.)]) +(?:\[[ xX]\] +)?/);
+    if (list !== null) {
+      content = content.slice(list[0].length);
+      changed = true;
+    }
+  }
+
+  return content.replace(/^ {1,3}/, "");
+}
+
+function codeFence(content: string): string | undefined {
+  const match = content.match(/^ {0,3}(`{3,}|~{3,})/);
+  return match?.[1];
+}
+
+function isIndentedCode(line: string): boolean {
+  return /^(?: {4}|\t)/.test(line);
+}
+
+function isRawOpening(content: string): boolean {
+  return content.trim() === "$$" || /^:::[A-Za-z][\w-]*(?:[ \t].*)?$/.test(content.trim());
 }

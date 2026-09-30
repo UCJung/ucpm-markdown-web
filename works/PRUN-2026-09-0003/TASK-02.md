@@ -38,13 +38,13 @@ PRUN-2026-09-0003: GFM Markdown 변환과 미지원 블록 원문 보존 구현
 
 ## Acceptance Criteria
 
-- [ ] raw HTML·math·directive 보존 fixture의 raw source가 import/export 중 동일.
-- [ ] raw 블록이 코드에서 HTML/DOM으로 렌더·실행되지 않음.
-- [ ] fence 내부 math/directive 유사 문자열은 코드 블록으로 유지.
-- [ ] 지원 GFM fixture의 의미 보존·정규화 허용 차이가 문서와 테스트에서 일치.
-- [ ] raw 보존 fixture의 입력과 기대 export 원문 기록.
-- [ ] 혼합 블록·CRLF·trailing newline 테스트 통과.
-- [ ] `pnpm build`, `pnpm typecheck`, `pnpm test` 통과.
+- [x] raw HTML·math·directive 보존 fixture의 raw source가 import/export 중 동일.
+- [x] raw 블록이 코드에서 HTML/DOM으로 렌더·실행되지 않음.
+- [x] fence 내부 math/directive 유사 문자열은 코드 블록으로 유지.
+- [x] 지원 GFM fixture의 의미 보존·정규화 허용 차이가 문서와 테스트에서 일치.
+- [x] raw 보존 fixture의 입력과 기대 export 원문 기록.
+- [x] 혼합 블록·CRLF·trailing newline 테스트 통과.
+- [x] `pnpm build`, `pnpm typecheck`, `pnpm test` 통과.
 
 ## Verify
 

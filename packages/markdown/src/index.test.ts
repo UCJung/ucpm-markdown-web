@@ -1,5 +1,10 @@
 import { createEditor } from "@uc-markdown-web/core";
 import { describe, expect, it } from "vitest";
+import {
+  fencedCodeFixture,
+  indentedCodeFixture,
+  rawPreservationFixtures
+} from "./fixtures/raw-preservation.js";
 import { parseMarkdown, createMarkdownSchema, serializeMarkdown } from "./index.js";
 
 describe("Markdown GFM conversion", () => {
@@ -60,8 +65,27 @@ describe("Markdown GFM conversion", () => {
     editor.destroy();
   });
 
-  it("rejects raw HTML until the raw preservation implementation is available", () => {
-    expect(() => parseMarkdown("<aside>raw</aside>")).toThrow("Raw HTML preservation");
+  it("preserves raw block fixture source without rendering it", () => {
+    for (const fixture of rawPreservationFixtures) {
+      const document = parseMarkdown(fixture.source);
+      const rawSources = document.content.content
+        .filter((node) => node.type.name === "raw_markdown_block")
+        .map((node) => node.attrs.source);
+
+      expect(rawSources, fixture.name).toEqual(fixture.expectedRawSources);
+      expect(document.content.content.every((node) => node.type.name !== "raw_markdown_block" || node.childCount === 0), fixture.name).toBe(true);
+      expect(serializeMarkdown(document), fixture.name).toBe(fixture.expectedExport);
+    }
+  });
+
+  it("does not classify math or directives inside code blocks as raw", () => {
+    for (const fixture of [fencedCodeFixture, indentedCodeFixture]) {
+      const document = parseMarkdown(fixture.source);
+
+      expect(document.firstChild?.type.name).toBe("code_block");
+      expect(document.content.content.some((node) => node.type.name === "raw_markdown_block")).toBe(false);
+      expect(serializeMarkdown(document)).toBe(fixture.expectedExport);
+    }
   });
 });
 
