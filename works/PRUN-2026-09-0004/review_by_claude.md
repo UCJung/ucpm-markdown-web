@@ -57,7 +57,7 @@ jsdom 테스트는 `handleTextInput`을 직접 호출하고 실제 DOM 변경/Mu
 - [low] ordered_list input rule이 입력된 시작 번호를 order 속성에 반영하지 않음 (packages/extensions/src/input-rules.ts:20-24, 0.8) — `listRule(/^\d+[.)] $/, "ordered_list")`는 매치된 숫자를 버리고 `wrapInList(type)`을 기본 attrs로 호출하므로, `3. `을 입력해도 `order`는 기본값 1이 된다. 반면 붙여넣기 경로(`paste.ts:97` `parseOrder`)는 `start` 속성을 보존한다 — 두 입력 경로의 계약이 어긋난다. 권고: `listRule`이 match를 받아 `ordered_list`에 `{ order }`를 전달하도록 하고(또는 order 미지원을 명시적 결정으로 기록), 붙여넣기와 동일한 규칙임을 테스트로 고정한다.
 - [low] 표 명령의 header 속성 결정이 기존 행의 실제 header 값과 무관 (packages/extensions/src/commands.ts:45-69, 0.7) — `addTableCell`은 새 셀의 `header`를 행 인덱스(`index === 0`)로만 정하고, `addTableRow`는 `cell.create(null, ...)`로 항상 기본값 `false`를 쓴다. 기존 표의 첫 행이 header가 아닌 경우(붙여넣기로 만든 표는 `thead`/`th` 여부에 따라 달라짐) 같은 행 안에서 `th`/`td`가 섞여 렌더링된다. Markdown serializer는 `header`를 무시하므로(`serializer.ts:82-113`) 왕복 테스트로는 드러나지 않고 view 표시에서만 어긋난다. 권고: 새 셀의 `header`/`align`은 같은 행의 기존 셀 속성에서 상속하도록 바꾸고, 혼합 header 행이 생기지 않음을 단언하는 테스트를 추가한다.
 - [low] 드롭(drop) 경로는 붙여넣기 allowlist 정규화를 거치지 않는다 (packages/extensions/src/paste.ts:10-24, 0.55) — `createSafePastePlugin`은 `handlePaste`만 제공하고 `handleDrop`/`transformPasted`를 제공하지 않는다. 드롭된 HTML은 ProseMirror 기본 `DOMParser.fromSchema` 경로로 처리되는데, 스키마에 `parseDOM` 규칙이 전혀 없어 실질적으로 텍스트만 남을 것으로 보인다(즉 즉시 보안 문제로는 보이지 않음 — 실행 확인 안 함). 그러나 FR-03/FR-04의 정규화 계약이 paste에만 걸려 있어, 향후 `parseDOM`이 추가되면 드롭이 allowlist를 우회하는 구멍이 된다. 권고: 정규화를 `transformPasted`(또는 `handleDrop` 포함)로 옮겨 paste·drop이 동일 경로를 쓰게 하고, 드롭 시나리오 회귀 테스트를 추가한다.
-- [low] URL 안전성 검사가 zero-width/soft-hyphen 문자를 걸러내지 않음 (packages/extensions/src/safe-url.ts:1-53, 0.5) — `CONTROL_OR_WHITESPACE`는 ` - `, `-`, `\s`를 막지만 U+200B~U+200D, U+2060, U+00AD는 포함하지 않는다. 이 문자들이 섞인 `java​script:`는 scheme 정규식(`^([a-z][a-z0-9+.-]*):`)에 걸리지 않아 "scheme 없음 → 상대경로"로 판정되어 `isSafeUrl`이 true를 반환한다. URL 표준은 이 문자들을 제거하지 않으므로 브라우저도 scheme으로 인식하지 않아 현재로서는 탐색이 일어나지 않을 것으로 보이며(브라우저 실행 확인 안 함), 실질 위험은 낮다. 다만 방어 심층성 관점에서 obfuscation fixture(R-02) 범위에서 빠져 있다. 권고: `CONTROL_OR_WHITESPACE`에 `­​-‍⁠﻿`를 추가하고 해당 fixture를 `unsafeHrefs`에 넣는다.
+- [low] URL 안전성 검사가 zero-width/soft-hyphen 문자를 걸러내지 않음 (packages/extensions/src/safe-url.ts:1-53, 0.5) — `CONTROL_OR_WHITESPACE`는 `\u0000- `, `\u007f-\u009f`, `\s`를 막지만 U+200B~U+200D, U+2060, U+00AD는 포함하지 않는다. 이 문자들이 섞인 `java​script:`는 scheme 정규식(`^([a-z][a-z0-9+.-]*):`)에 걸리지 않아 "scheme 없음 → 상대경로"로 판정되어 `isSafeUrl`이 true를 반환한다. URL 표준은 이 문자들을 제거하지 않으므로 브라우저도 scheme으로 인식하지 않아 현재로서는 탐색이 일어나지 않을 것으로 보이며(브라우저 실행 확인 안 함), 실질 위험은 낮다. 다만 방어 심층성 관점에서 obfuscation fixture(R-02) 범위에서 빠져 있다. 권고: `CONTROL_OR_WHITESPACE`에 `­​-‍⁠﻿`를 추가하고 해당 fixture를 `unsafeHrefs`에 넣는다.
 
 ## 렌즈별 확인
 
@@ -81,4 +81,3 @@ jsdom 테스트는 `handleTextInput`을 직접 호출하고 실제 DOM 변경/Mu
 ## 반영
 
 후속 TASK 실수정 예정.
-
