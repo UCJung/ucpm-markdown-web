@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@uc-markdown-web/core": "workspace:*",
+    "@uc-markdown-web/extensions": "workspace:*",
     "@uc-markdown-web/markdown": "workspace:*"
   }
 }

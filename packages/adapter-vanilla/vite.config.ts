@@ -8,7 +8,7 @@ export default defineConfig({
       fileName: "index"
     },
     rollupOptions: {
-      external: ["@uc-markdown-web/core", "@uc-markdown-web/markdown"]
+      external: ["@uc-markdown-web/core", "@uc-markdown-web/extensions", "@uc-markdown-web/markdown"]
     }
   }
 });

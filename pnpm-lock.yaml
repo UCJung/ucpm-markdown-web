@@ -23,6 +23,9 @@ importers:
       '@uc-markdown-web/core':
         specifier: workspace:*
         version: link:../core
+      '@uc-markdown-web/extensions':
+        specifier: workspace:*
+        version: link:../extensions
       '@uc-markdown-web/markdown':
         specifier: workspace:*
         version: link:../markdown
