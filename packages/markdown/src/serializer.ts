@@ -62,10 +62,13 @@ function serializeTaskList(node: ProseMirrorNode): MarkdownNode {
     ordered: false,
     spread: false,
     children: node.content.content.map((item) => {
-      if (item.type.name !== "task_item") {
-        throw new Error("task_list may only contain task_item nodes.");
+      if (item.type.name === "list_item") {
+        return serializeListItem(item, "list_item");
       }
 
+      if (item.type.name !== "task_item") {
+        throw new Error("task_list may only contain list_item or task_item nodes.");
+      }
       return { ...serializeListItem(item, "task_item"), checked: booleanAttribute(item.attrs.checked, "task_item checked") };
     })
   };

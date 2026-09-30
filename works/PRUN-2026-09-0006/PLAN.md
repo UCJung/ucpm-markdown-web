@@ -27,7 +27,7 @@
 
 | 항목 | 내용 |
 |------|------|
-| 스키마 변경 | 없음 |
+| 스키마 변경 | TASK-05: 유효 GFM 혼합 목록 보존을 위한 목록 스키마 호환 수정 |
 | 마이그레이션 필요 | 없음 |
 | 변경 내용 | 품질 실행 기록, 배포 메타데이터 검토표, 릴리스 체크리스트 추가 |
 
@@ -68,7 +68,8 @@
 | TASK-01 | 품질·브라우저·접근성 자동 검증 | TASK-00 | 2 | Must | FR-01, FR-02, FR-03, NFR-01, NFR-02, NFR-03 | M |
 | TASK-02 | VitePress 소비자 문서 | TASK-00 | 2 | Must | FR-04, FR-03, NFR-02, NFR-03, NFR-04 | M |
 | TASK-03 | 배포 메타데이터·tarball 소비 검증 | TASK-00 | 2 | Must | FR-05, NFR-01, NFR-04 | M |
-| TASK-04 | 릴리스 증빙·노트·게시/되돌림 절차 | TASK-01, TASK-02, TASK-03 | 3 | Must | FR-01~FR-06, NFR-01~NFR-04 | M |
+| TASK-04 | 릴리스 증빙·노트·게시/되돌림 절차 | TASK-01, TASK-02, TASK-03, TASK-05 | 3 | Must | FR-01~FR-06, NFR-01~NFR-04 | M |
+| TASK-05 | 유효 GFM 혼합 목록 import 결함 수정 | TASK-00 | 2 | Must | FR-01, FR-02, NFR-01 | M |
 
 ## Task 의존성 그래프
 
@@ -78,7 +79,7 @@ TASK-00 ──┬──> TASK-01 ──┐
           └──> TASK-03 ──┘
 ```
 
-TASK-00 완료 → TASK-01·TASK-02·TASK-03 병렬 실행 → 세 작업 완료 후 TASK-04 실행.
+TASK-00 완료 → TASK-01·TASK-02·TASK-03 병렬 실행 → 발견 결함 TASK-05 보정 및 브라우저 재검증 → 네 작업 완료 후 TASK-04 실행.
 
 ## 리스크 및 대응
 

@@ -57,6 +57,35 @@ describe("Markdown GFM conversion", () => {
     expectRoundTrip(source);
   });
 
+  it("preserves mixed regular and task list items, including nested lists", () => {
+    const source = [
+      "- regular first",
+      "- [x] completed",
+      "  - nested regular",
+      "  - [ ] nested pending",
+      "- [ ] pending",
+      "- regular last"
+    ].join("\n");
+
+    const document = parseMarkdown(source);
+    const list = document.firstChild;
+    const nestedList = list?.child(1).lastChild;
+
+    expect(list?.type.name).toBe("task_list");
+    expect(list?.content.content.map((item) => item.type.name)).toEqual([
+      "list_item",
+      "task_item",
+      "task_item",
+      "list_item"
+    ]);
+    expect(list?.child(1).attrs.checked).toBe(true);
+    expect(list?.child(2).attrs.checked).toBe(false);
+    expect(nestedList?.type.name).toBe("task_list");
+    expect(nestedList?.content.content.map((item) => item.type.name)).toEqual(["list_item", "task_item"]);
+    expect(nestedList?.child(1).attrs.checked).toBe(false);
+    expectRoundTrip(source);
+  });
+
   it("creates a core editor with the Markdown schema", () => {
     const schema = createMarkdownSchema();
     const document = parseMarkdown("# Ready", schema);

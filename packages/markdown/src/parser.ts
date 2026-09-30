@@ -118,12 +118,13 @@ function parseList(node: MarkdownNode, schema: Schema): ProseMirrorNode {
   const taskStates = items.map((item) => item.checked);
   const hasTaskItems = taskStates.some((checked) => typeof checked === "boolean");
 
-  if (hasTaskItems && taskStates.some((checked) => typeof checked !== "boolean")) {
-    throw new Error("Mixed task and regular list items are not supported.");
-  }
-
   if (hasTaskItems) {
-    return schema.node("task_list", null, items.map((item) => schema.node("task_item", { checked: item.checked }, requireChildren(item, "listItem").map((child) => parseBlock(child, schema)))));
+    return schema.node("task_list", null, items.map((item) => {
+      const content = requireChildren(item, "listItem").map((child) => parseBlock(child, schema));
+      return typeof item.checked === "boolean"
+        ? schema.node("task_item", { checked: item.checked }, content)
+        : schema.node("list_item", null, content);
+    }));
   }
 
   return schema.node(

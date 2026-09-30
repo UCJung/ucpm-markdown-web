@@ -11,7 +11,7 @@ PRUN-2026-09-0006: 공개 npm 0.x 후보 품질·문서·배포 준비
 | 매핑 요구사항 | FR-01, FR-02, FR-03, FR-04, FR-05, FR-06, NFR-01, NFR-02, NFR-03, NFR-04 |
 | 우선순위 | Must |
 | 예상 규모 | M |
-| 의존관계 | TASK-01, TASK-02, TASK-03 완료 후 |
+| 의존관계 | TASK-01, TASK-02, TASK-03, TASK-05 완료 후 |
 | Phase | Phase 3 |
 
 ## Scope
