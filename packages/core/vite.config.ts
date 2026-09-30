@@ -8,7 +8,14 @@ export default defineConfig({
       fileName: "index"
     },
     rollupOptions: {
-      external: ["@uc-markdown-web/extension-api"]
+      external: [
+        "@uc-markdown-web/extension-api",
+        "prosemirror-commands",
+        "prosemirror-history",
+        "prosemirror-keymap",
+        "prosemirror-model",
+        "prosemirror-state"
+      ]
     }
   }
 });
