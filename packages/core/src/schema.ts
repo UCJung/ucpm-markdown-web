@@ -36,11 +36,15 @@ const baseMarkSpecs: Record<string, MarkSpec> = {
   code: { excludes: "_" }
 };
 
-export function createEditorSchema(extensions: readonly Extension[] = []): Schema {
-  const nodes = { ...baseNodeSpecs };
-  const marks = { ...baseMarkSpecs };
+export function createEditorSchema(
+  extensions: readonly Extension[] = [],
+  baseSchema?: Schema
+): Schema {
+  const nodes = baseSchema === undefined ? { ...baseNodeSpecs } : getNodeSpecs(baseSchema);
+  const marks = baseSchema === undefined ? { ...baseMarkSpecs } : getMarkSpecs(baseSchema);
   const extensionNames = new Set<string>();
   const schemaSpecNames = new Set<string>([...Object.keys(nodes), ...Object.keys(marks)]);
+  let hasExtensionSpecs = false;
 
   for (const extension of extensions) {
     const extensionName = extension.name.trim();
@@ -54,11 +58,32 @@ export function createEditorSchema(extensions: readonly Extension[] = []): Schem
     }
 
     extensionNames.add(extensionName);
+    hasExtensionSpecs ||= hasSpecs(extension.nodes) || hasSpecs(extension.marks);
     mergeSpecs(nodes, extension.nodes, schemaSpecNames, extensionName);
     mergeSpecs(marks, extension.marks, schemaSpecNames, extensionName);
   }
 
+  if (baseSchema !== undefined && !hasExtensionSpecs) {
+    return baseSchema;
+  }
+
   return new Schema({ nodes, marks });
+}
+
+function hasSpecs(specs: Readonly<Record<string, NodeSpec | MarkSpec>> | undefined): boolean {
+  return specs !== undefined && Object.keys(specs).length > 0;
+}
+
+function getNodeSpecs(schema: Schema): Record<string, NodeSpec> {
+  return Object.fromEntries(
+    Object.entries(schema.nodes).map(([name, nodeType]) => [name, nodeType.spec])
+  );
+}
+
+function getMarkSpecs(schema: Schema): Record<string, MarkSpec> {
+  return Object.fromEntries(
+    Object.entries(schema.marks).map(([name, markType]) => [name, markType.spec])
+  );
 }
 
 function mergeSpecs<T extends NodeSpec | MarkSpec>(

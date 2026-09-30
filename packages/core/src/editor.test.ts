@@ -1,3 +1,4 @@
+import { Schema } from "prosemirror-model";
 import { Plugin } from "prosemirror-state";
 import { describe, expect, it } from "vitest";
 
@@ -33,7 +34,7 @@ describe("headless editor", () => {
     expect(observed).toEqual(["hello!:1"]);
   });
 
-  it("checks initial document schema identity and JSON validity", () => {
+  it("checks initial document schema identity, top node type, and JSON validity", () => {
     const schema = createEditorSchema();
     const document = schema.node("doc", undefined, [schema.node("paragraph", undefined, schema.text("text"))]);
     const editor = createEditor({ schema, doc: document });
@@ -42,7 +43,63 @@ describe("headless editor", () => {
     expect(() => createEditor({ schema: createEditorSchema(), doc: document })).toThrow(
       "Initial document schema does not match the editor schema."
     );
+    expect(() => createEditor({ schema, doc: schema.node("paragraph", undefined, schema.text("text")) })).toThrow(
+      "Initial document must be a \"doc\" node."
+    );
+    expect(() =>
+      createEditor({
+        doc: {
+          type: "paragraph",
+          content: [{ type: "text", text: "text" }]
+        }
+      })
+    ).toThrow(
+      "Initial document must be a \"doc\" node."
+    );
     expect(() => createEditor({ doc: { type: "unknown" } })).toThrow();
+  });
+
+  it("merges extension specs into an external schema and rejects base collisions", () => {
+    const baseSchema = new Schema({
+      nodes: {
+        doc: { content: "block+" },
+        paragraph: { content: "inline*", group: "block" },
+        text: { group: "inline" }
+      },
+      marks: {}
+    });
+    const editor = createEditor({
+      schema: baseSchema,
+      extensions: [
+        {
+          name: "raw-markdown",
+          nodes: {
+            raw_markdown_block: {
+              attrs: { content: { default: "" } },
+              atom: true,
+              group: "block"
+            }
+          },
+          marks: {
+            highlight: {}
+          }
+        }
+      ]
+    });
+
+    expect(editor.schema.nodes).toHaveProperty("raw_markdown_block");
+    expect(editor.schema.marks).toHaveProperty("highlight");
+    expect(() =>
+      createEditor({
+        schema: baseSchema,
+        extensions: [
+          {
+            name: "conflicting-paragraph",
+            nodes: { paragraph: { content: "inline*", group: "block" } }
+          }
+        ]
+      })
+    ).toThrow("Duplicate schema spec name: paragraph in extension conflicting-paragraph.");
   });
 
   it("honors extension plugin filtering, appending, and keymap registration", () => {
@@ -143,6 +200,9 @@ describe("headless editor", () => {
 
     expect(listenerErrors).toEqual(["failed", "continued"]);
     expect(dispatchError).toBeInstanceOf(AggregateError);
+    expect((dispatchError as Error).message).toBe(
+      "Editor listener callbacks failed after the transaction was applied."
+    );
     expect((dispatchError as AggregateError).errors).toHaveLength(1);
   });
 });

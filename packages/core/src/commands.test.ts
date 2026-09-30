@@ -1,4 +1,4 @@
-import { TextSelection } from "prosemirror-state";
+import { Plugin, TextSelection } from "prosemirror-state";
 import { describe, expect, it } from "vitest";
 
 import { createEditor } from "./editor.js";
@@ -55,5 +55,49 @@ describe("editor commands", () => {
 
     expect(appendExclamation()).toBe(true);
     expect(editor.getState().doc.textContent).toBe("!");
+  });
+
+  it("returns false when a filter rejects basic or extension command transactions", () => {
+    const basicCommandEditor = createEditor({
+      extensions: [
+        {
+          name: "reject-stored-marks",
+          plugins: [
+            new Plugin({
+              filterTransaction: (transaction) => !transaction.storedMarksSet
+            })
+          ]
+        }
+      ]
+    });
+
+    expect(basicCommandEditor.commands.toggleBold()).toBe(false);
+
+    const extensionCommandEditor = createEditor({
+      extensions: [
+        {
+          name: "reject-document-change",
+          plugins: [
+            new Plugin({
+              filterTransaction: (transaction) => !transaction.docChanged
+            })
+          ],
+          commands: {
+            appendText: ({ state, dispatch }) => {
+              dispatch(state.tr.insertText("blocked", state.doc.content.size - 1));
+              return true;
+            }
+          }
+        }
+      ]
+    });
+    const appendText = extensionCommandEditor.extensionCommands.appendText;
+
+    if (appendText === undefined) {
+      throw new Error("Expected the extension command to be registered.");
+    }
+
+    expect(appendText()).toBe(false);
+    expect(extensionCommandEditor.getState().doc.textContent).toBe("");
   });
 });

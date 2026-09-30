@@ -21,15 +21,11 @@ export function createEditorCommands(
   const code = schema.marks.code;
   const paragraph = schema.nodes.paragraph;
 
-  if (strong === undefined || em === undefined || code === undefined || paragraph === undefined) {
-    throw new Error("The editor schema is missing required base specs.");
-  }
-
   return {
-    toggleBold: () => runCommand(toggleMark(strong)),
-    toggleItalic: () => runCommand(toggleMark(em)),
-    toggleCode: () => runCommand(toggleMark(code)),
-    setParagraph: () => runCommand(setBlockType(paragraph)),
+    toggleBold: () => strong === undefined ? false : runCommand(toggleMark(strong)),
+    toggleItalic: () => em === undefined ? false : runCommand(toggleMark(em)),
+    toggleCode: () => code === undefined ? false : runCommand(toggleMark(code)),
+    setParagraph: () => paragraph === undefined ? false : runCommand(setBlockType(paragraph)),
     undo: () => runCommand(undo),
     redo: () => runCommand(redo)
   };

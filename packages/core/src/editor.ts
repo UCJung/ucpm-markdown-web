@@ -47,11 +47,7 @@ class HeadlessEditor implements Editor {
 
   constructor(options: EditorOptions) {
     this.extensions = options.extensions ?? [];
-    this.schema = options.schema ?? createEditorSchema(this.extensions);
-
-    if (options.schema !== undefined) {
-      createEditorSchema(this.extensions);
-    }
+    this.schema = createEditorSchema(this.extensions, options.schema);
 
     const plugins = createPlugins(this.extensions);
     this.state = EditorState.create({
@@ -71,6 +67,10 @@ class HeadlessEditor implements Editor {
     return this.state;
   }
 
+  /**
+   * Applies a transaction before synchronously notifying listeners.
+   * Listener errors are reported after the transaction remains applied.
+   */
   dispatch(transaction: Transaction): boolean {
     this.assertActive();
 
@@ -116,19 +116,25 @@ class HeadlessEditor implements Editor {
 
   private runCommand(command: (state: EditorState, dispatch?: (transaction: Transaction) => void) => boolean): boolean {
     this.assertActive();
-    return command(this.state, (transaction) => {
-      this.dispatch(transaction);
+    let applied = false;
+    const commandResult = command(this.state, (transaction) => {
+      applied = this.dispatch(transaction) || applied;
     });
+
+    return commandResult && applied;
   }
 
   private runExtensionCommand(command: ExtensionCommand): boolean {
     this.assertActive();
-    return command({
+    let applied = false;
+    const commandResult = command({
       state: this.state,
       dispatch: (transaction) => {
-        this.dispatch(transaction);
+        applied = this.dispatch(transaction) || applied;
       }
     });
+
+    return commandResult && applied;
   }
 
   private initializeExtensions(): void {
@@ -185,7 +191,7 @@ class HeadlessEditor implements Editor {
       this.notifying = false;
     }
 
-    throwCollected(errors, "Editor listener callbacks failed.");
+    throwCollected(errors, "Editor listener callbacks failed after the transaction was applied.");
   }
 
   private assertActive(): void {
@@ -247,13 +253,20 @@ function createInitialDocument(
       throw new Error("Initial document schema does not match the editor schema.");
     }
 
-    document.check();
-    return document;
+    return validateTopNode(schema, document);
   }
 
   const parsedDocument = schema.nodeFromJSON(document);
-  parsedDocument.check();
-  return parsedDocument;
+  return validateTopNode(schema, parsedDocument);
+}
+
+function validateTopNode(schema: Schema, document: ProseMirrorNode): ProseMirrorNode {
+  if (document.type !== schema.topNodeType) {
+    throw new Error(`Initial document must be a "${schema.topNodeType.name}" node.`);
+  }
+
+  document.check();
+  return document;
 }
 
 function throwCollected(errors: readonly unknown[], message: string): void {
