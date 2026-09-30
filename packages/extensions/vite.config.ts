@@ -11,7 +11,13 @@ export default defineConfig({
       external: [
         "@uc-markdown-web/core",
         "@uc-markdown-web/markdown",
-        "@uc-markdown-web/extension-api"
+        "@uc-markdown-web/extension-api",
+        "prosemirror-inputrules",
+        "prosemirror-history",
+        "prosemirror-model",
+        "prosemirror-schema-list",
+        "prosemirror-state",
+        "prosemirror-tables"
       ]
     }
   }
