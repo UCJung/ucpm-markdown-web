@@ -23,9 +23,16 @@ importers:
       '@uc-markdown-web/core':
         specifier: workspace:*
         version: link:../core
+      '@uc-markdown-web/extensions':
+        specifier: workspace:*
+        version: link:../extensions
       '@uc-markdown-web/markdown':
         specifier: workspace:*
         version: link:../markdown
+    devDependencies:
+      jsdom:
+        specifier: ^27.1.0
+        version: 27.4.0
 
   packages/core:
     dependencies:
