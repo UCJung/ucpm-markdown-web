@@ -1,8 +1,9 @@
 import { InputRule, inputRules } from "prosemirror-inputrules";
+import type { ResolvedPos } from "prosemirror-model";
 import { wrapInList } from "prosemirror-schema-list";
 export function createMarkdownInputRules() {
   return inputRules({ rules: [new InputRule(/^(#{1,6}) $/, (state, match, start, end) => {
-    if (["code_block", "raw_markdown_block"].includes(state.selection.$from.parent.type.name)) return null;
+    if (excluded(state)) return null;
     const heading = state.schema.nodes.heading;
     return heading === undefined ? null : state.tr.delete(start, end).setBlockType(start, start, heading, { level: match[1]?.length ?? 1 });
   }), new InputRule(/^> $/, (state, _match, start, end) => {
@@ -21,4 +22,11 @@ function listRule(expression: RegExp, name: "bullet_list" | "ordered_list") { re
   if (type !== undefined) wrapInList(type)(state, (transaction) => { result = transaction.delete(start, end); });
   return result;
 }); }
-function excluded(state: { readonly selection: { readonly $from: { readonly parent: { readonly type: { readonly name: string } } } } }) { return ["code_block", "raw_markdown_block"].includes(state.selection.$from.parent.type.name); }
+function excluded(state: { readonly selection: { readonly $from: ResolvedPos } }) {
+  for (let depth = state.selection.$from.depth; depth >= 0; depth -= 1) {
+    if (["code_block", "raw_markdown_block", "table_cell"].includes(state.selection.$from.node(depth).type.name)) {
+      return true;
+    }
+  }
+  return false;
+}

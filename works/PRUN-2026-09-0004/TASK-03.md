@@ -35,11 +35,11 @@ PRUN-2026-09-0004: 기본 편집 경험과 안전한 HTML 붙여넣기 구현
 
 ## Acceptance Criteria
 
-- [ ] 목록·표·코드·undo/redo·input rule·shortcut·selection 상호작용 테스트 실행.
-- [ ] 허용 HTML 변환 및 Markdown export 테스트 실행.
-- [ ] script/event/raw HTML 비실행, 위험 URL 비탐색 테스트 실행.
-- [ ] 표 셀 단일 paragraph 계약 검증.
-- [ ] `pnpm build`, `pnpm typecheck`, `pnpm test` 통과.
+- [x] 목록·표·코드·undo/redo·input rule·shortcut·selection 상호작용 테스트 실행.
+- [x] 허용 HTML 변환 및 Markdown export 테스트 실행.
+- [x] script/event/raw HTML 비실행, 위험 URL 비탐색 테스트 실행.
+- [x] 표 셀 단일 paragraph 계약 검증.
+- [x] `pnpm build`, `pnpm typecheck`, `pnpm test` 통과.
 
 ## Verify
 
