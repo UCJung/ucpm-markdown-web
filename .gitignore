@@ -57,6 +57,11 @@ frontend/dist-ssr/
 apps/*/node_modules/
 apps/*/dist/
 apps/*/dist-ssr/
+node_modules/
+packages/*/dist/
+packages/*/node_modules/
+packages/*/.vite/
+coverage/
 *.local
 
 # 참고: backend/docker-compose-local.yml 은 이 템플릿이 제공하는 스캐폴딩 자산이므로 추적한다
