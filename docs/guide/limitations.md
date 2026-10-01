@@ -4,8 +4,8 @@
 |---|---|
 | 설명 | 브라우저·접근성·기능·배포 제한 |
 | 생성일 | 2026-09-30 |
-| 수정일 | 2026-09-30 |
-| 버전 | 0.1.1 |
+| 수정일 | 2026-10-01 |
+| 버전 | 0.1.3 |
 
 현재 `0.x` API는 실험 단계임. 실제 브라우저 버전·수동 접근성·npm 공개 배포는 검증 또는 결정 완료 전 상태임.
 
@@ -34,19 +34,19 @@
 | 구분 | 정책 또는 근거 | 현재 상태 |
 |---|---|---|
 | 지원 정책 | Chrome·Edge·Firefox·Safari의 최신·직전 메이저 | 정책 정의 완료 |
-| 자동 엔진 검증 | Playwright Chromium·Firefox·WebKit | 독립 Chromium `153.0.8010.12`·Firefox `155.0` 전체 12건 PASS, 1.1분; Playwright WebKit revision `2359` 시작 FAIL, 실제 실행 브라우저 버전 확인 불가 |
+| 자동 엔진 검증 | Docker Linux Playwright Chromium·Firefox·WebKit | 초기 이미지 `RUN_ID=20261001-121500-all` 18/18 PASS; 로그 제외 최종 이미지 `sha256:6a9493277a2b0230034133cedb637a2572d27dba88d600e9741d06786aaebfc1`, `RUN_ID=20261001-verifier-all18` 독립 18/18 PASS |
 | 실제 버전 검증 | 각 브라우저 최신·직전 정식 릴리스 | 미실행, 엔진 결과만으로 보증 불가 |
 
-Playwright Chromium은 Chrome·Edge 공통 엔진 근거이며, WebKit은 Safari 엔진 근거임. Playwright WebKit revision `2359`는 Windows 의존성 탐색 오류(`icuin77.dll`, `nghttp3.dll`, `jpeg62.dll`, `psl-5.dll`)로 실행하지 못해 실제 실행 브라우저 버전을 확인하지 못했고 후보 상태 `CANDIDATE BLOCKED` 유지. 실제 Chrome·Edge·Firefox·Safari 버전 매트릭스는 별도 실행·기록 필요.
+Playwright Chromium은 Chrome·Edge 공통 엔진 근거이며, WebKit은 Safari 엔진 근거임. 승인된 Docker Linux 환경에서 세 엔진 자동 검증을 통과했다. Windows Playwright WebKit revision `2359` DLL validator 실패는 환경 이력으로 유지. Docker Linux WebKit은 실제 Safari 또는 Chrome·Edge·Firefox·Safari 최근 2개 버전 매트릭스를 보증하지 않음.
 
 ## 3. 접근성 범위
 
 | 구분 | 기준 | 현재 상태 |
 |---|---|---|
 | 목표 | WCAG 2.2 AA | 목표 정의 완료 |
-| 자동 점검 | axe critical·serious 이슈 발생 시 릴리스 후보 차단 | 완료 엔진에서 0건; WebKit 미실행 |
-| 키보드 | 핵심 시나리오 확인 | 완료 엔진에서 PASS; WebKit 미실행 |
-| 수동·보조공학 | 스크린 리더·수동 적합성 평가 | 미검증 |
+| 자동 점검 | axe critical·serious 이슈 발생 시 릴리스 후보 차단 | Docker 세 엔진에서 0건 |
+| 키보드 | 핵심 시나리오 확인 | Docker 세 엔진에서 PASS |
+| 수동·보조공학 | 스크린 리더·수동 적합성 평가 | 미수행 |
 
 자동 점검과 키보드 검증만으로 WCAG 적합성 선언 불가. 수동·보조공학 검증 결과는 릴리스 후보에 별도 기록 필요.
 
@@ -73,3 +73,5 @@ Playwright Chromium은 Chrome·Edge 공통 엔진 근거이며, WebKit은 Safari
 |---|---|---|
 | 0.1.0 | 2026-09-30 | 기능·브라우저·접근성·배포 제한 추가 |
 | 0.1.1 | 2026-09-30 | 엔진별 실측 결과와 WebKit 차단 상태 반영 |
+| 0.1.2 | 2026-10-01 | Docker 세 엔진 자동 PASS와 수동 UI·보조공학 미수행 반영 |
+| 0.1.3 | 2026-10-01 | 로그 제외 최종 이미지 독립 18/18 PASS 반영 |

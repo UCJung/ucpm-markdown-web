@@ -4,8 +4,8 @@
 |---|---|
 | 설명 | WYSIWYG Markdown 에디터의 지원 브라우저와 검증·접근성 기준 정의 |
 | 생성일 | 2026-09-30 |
-| 수정일 | 2026-09-30 |
-| 버전 | 0.1.1 |
+| 수정일 | 2026-10-01 |
+| 버전 | 0.1.3 |
 
 MVP는 Chrome, Edge, Firefox, Safari의 최신 메이저 버전과 직전 메이저 버전을 지원 대상으로 관리함.
 
@@ -69,13 +69,14 @@ Playwright Chromium과 WebKit 실행 결과는 각각 Chrome·Edge, Safari의 �
 
 | 항목 | 상태 | 기록 위치 |
 |---|---|---|
-| Chromium E2E | Chromium `153.0.8010.12`, 독립 6/6 PASS | `tests/e2e/playground.spec.ts`, 릴리스 후보 증빙 |
-| Firefox E2E | Firefox `155.0`, 독립 6/6 PASS; Chromium·Firefox 전체 12건 PASS, 1.1분; 이전 동시 HMR 전체 timeout은 무효 | `tests/e2e/playground.spec.ts`, 릴리스 후보 증빙 |
-| WebKit E2E | Playwright WebKit revision `2359` 시작 FAIL; 실제 실행 브라우저 버전 확인 불가; `icuin77.dll`, `nghttp3.dll`, `jpeg62.dll`, `psl-5.dll` 탐색 실패 | 릴리스 후보 증빙 |
-| axe·키보드 점검 | 완료 엔진에서 axe critical·serious 0건, 키보드 시나리오 PASS; WebKit 미실행 | `tests/e2e/playground.spec.ts`, 릴리스 후보 증빙 |
+| Docker 세 엔진 E2E | 초기 이미지 `sha256:15973d3d7015b9a19ac6d4512a54e66fe569ede48d6b5f6970090f790bf2a72d`, Linux `amd64`, `RUN_ID=20261001-121500-all`; Chromium `153.0.8010.12`·Firefox `155`·WebKit 18/18 PASS | `playwright-report/20261001-121500-all/`, 릴리스 후보 증빙 |
+| 최종 Docker 세 엔진 E2E | 로그 제외 이미지 `sha256:6a9493277a2b0230034133cedb637a2572d27dba88d600e9741d06786aaebfc1`, `RUN_ID=20261001-verifier-all18`; 독립 18/18 PASS, 1.5분 | `playwright-report/20261001-verifier-all18/`, `test-results/20261001-verifier-all18/`, 릴리스 후보 증빙 |
+| Docker WebKit 단독 | `RUN_ID=20261001-121500-webkit`; WebKit 6/6 PASS | `playwright-report/20261001-121500-webkit/`, 릴리스 후보 증빙 |
+| axe·키보드 점검 | Docker 세 엔진에서 axe critical·serious 0건, 키보드 시나리오 PASS | `tests/e2e/playground.spec.ts`, 릴리스 후보 증빙 |
+| Windows WebKit 이력 | Playwright WebKit revision `2359` DLL validator 실패 | Docker Linux 자동 검증으로 해소; vendor 브라우저 근거 아님 |
 | 실제 Chrome·Edge·Firefox·Safari 최신·직전 버전 | 미실행 | 릴리스 후보 검증 결과 |
 
-WebKit 실패, 실제 브라우저 버전, 수동·보조공학 검증 미실행으로 현재 후보 상태는 `CANDIDATE BLOCKED`. 엔진 결과만으로 실제 브라우저 지원을 보증하지 않음.
+초기·로그 제외 최종 Docker 자동 품질은 PASS. 실제 브라우저 버전과 수동·보조공학은 미검증이며, Docker Linux WebKit 결과는 실제 Safari 또는 vendor 최근 2개 버전 지원을 보증하지 않음. 공개 게시·릴리스 승인은 별도 메타데이터 확인 전 완료 아님.
 
 ## 참조 파일
 
@@ -92,3 +93,5 @@ WebKit 실패, 실제 브라우저 버전, 수동·보조공학 검증 미실행
 | 0.1.0 | 2026-09-30 | 최근 2개 주요 버전 지원 정책과 Playwright·실제 브라우저 검증 기준 정의 |
 | 0.1.0 | 2026-09-30 | WCAG 목표·자동 차단 기준·이번 실행 미검증 범위 추가 |
 | 0.1.1 | 2026-09-30 | Chromium·Firefox 통과, WebKit 시작 실패와 후보 차단 상태 반영 |
+| 0.1.2 | 2026-10-01 | Docker Linux WebKit 6/6·세 엔진 18/18 자동 PASS와 검증 경계 반영 |
+| 0.1.3 | 2026-10-01 | 로그 제외 최종 이미지 독립 18/18 PASS 반영 |

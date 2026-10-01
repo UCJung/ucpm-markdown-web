@@ -4,12 +4,12 @@
 |---|---|
 | 설명 | 공개 npm `0.x` 후보의 승인·게시·사고 대응 절차 |
 | 생성일 | 2026-09-30 |
-| 수정일 | 2026-09-30 |
-| 버전 | 0.1.0 |
+| 수정일 | 2026-10-01 |
+| 버전 | 0.1.2 |
 
-## 현재 상태: `CANDIDATE BLOCKED`
+## 현재 상태: 자동 품질 `PASS`, 공개 게시 `CANDIDATE BLOCKED`
 
-현재 후보에서 `npm publish` 실행 금지. WebKit E2E와 외부 게시 결정값을 완료한 뒤 체크리스트 재개.
+현재 후보에서 `npm publish` 실행 금지. 초기·최종 자동 E2E는 통과했으나 외부 게시 결정값과 릴리스 승인 전 체크리스트 완료 금지.
 
 ## 목차
 
@@ -25,14 +25,15 @@
 
 | 게이트 | 현재 상태 | 게시 조건 |
 |---|---|---|
-| Chromium·Firefox·WebKit E2E | Playwright WebKit revision `2359` 시작 FAIL; 실제 실행 브라우저 버전 확인 불가 | WebKit 실행 가능한 환경에서 세 엔진 PASS |
-| axe critical·serious | WebKit 미실행 | 세 엔진 결과 0건 |
-| 실제 브라우저·수동 접근성 | 미검증 | 검증 범위·결과 승인 |
+| Chromium·Firefox·WebKit E2E | 초기 이미지 18/18 PASS; 최종 이미지 `sha256:6a9493277a2b0230034133cedb637a2572d27dba88d600e9741d06786aaebfc1`, `RUN_ID=20261001-verifier-all18`, 독립 18/18 PASS | 자동 품질 PASS 기록 유지 |
+| axe critical·serious | Docker 세 엔진 자동 결과 0건 | 독립 verifier 결과와 함께 기록 |
+| 실제 브라우저·수동 UI·접근성 | 미검증·미수행 | 검증 범위·결과 또는 승인된 예외 기록 |
 | npm 조직·공개 이름·권한 | 미확정 | 소유자 확인 |
 | 라이선스·repository | 미확정 | 승인된 메타데이터 반영 |
 | 버전·태그 | `0.0.0`; 공개 값 미확정 | 승인된 `0.x` 값 확정 |
 
-- [ ] [릴리스 후보 증빙]([NOTE]_RELEASE_CANDIDATE.md)의 모든 차단 해제 조건 완료
+- [x] 독립 Docker verifier 최종 결과를 [릴리스 후보 증빙]([NOTE]_RELEASE_CANDIDATE.md)에 반영
+- [ ] 로컬 수동 표시·입력과 수동·보조공학 범위를 기록
 - [ ] npm 로그인 계정·조직·패키지명·게시 권한 확인
 - [ ] 라이선스·repository·공개 버전·dist-tag 승인
 - [ ] 후보 패키지 `private` 설정을 승인된 공개 설정으로 변경
@@ -95,9 +96,12 @@
 - `docs/[NOTE]_RELEASE_NOTES_0X.md` — `0.x` 경고·제한
 - `docs/[SPEC]_BROWSER_SUPPORT.md` — 지원·검증 경계
 - `works/PRUN-2026-09-0006/DECISIONS.md` — D-01, D-06
+- `docs/[GUIDE]_DEPLOYMENT.md` — Docker RUN_ID·결과 보관 절차
 
 ## 문서 갱신 이력
 
 | 버전 | 수정일 | 주요 변경사항 |
 |---|---|---|
 | 0.1.0 | 2026-09-30 | 게시 차단·승인·검증·되돌림·후속 E2E 절차 추가 |
+| 0.1.1 | 2026-10-01 | Docker 세 엔진 자동 PASS와 독립·수동 검증 대기 상태 반영 |
+| 0.1.2 | 2026-10-01 | 로그 제외 최종 이미지 독립 18/18 PASS 반영 |

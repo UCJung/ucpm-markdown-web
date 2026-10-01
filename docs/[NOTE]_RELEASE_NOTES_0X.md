@@ -4,12 +4,12 @@
 |---|---|
 | 설명 | 공개 전 `0.x` 실험 API 후보의 변경·제한 기록 |
 | 생성일 | 2026-09-30 |
-| 수정일 | 2026-09-30 |
-| 버전 | 0.1.0 |
+| 수정일 | 2026-10-01 |
+| 버전 | 0.1.2 |
 
-## 후보 상태: `CANDIDATE BLOCKED`
+## 후보 상태: 자동 품질 `PASS`, 공개 게시 `CANDIDATE BLOCKED`
 
-이 문서는 게시 완료 노트가 아님. WebKit E2E 실패와 npm 공개 메타데이터 미확정으로 `npm publish` 미수행.
+이 문서는 게시 완료 노트가 아님. Docker Linux 초기·최종 자동 품질은 통과했으나 npm 공개 메타데이터 미확정으로 `npm publish` 미수행.
 
 ## 목차
 
@@ -27,7 +27,7 @@
 | 후보 버전 | `0.0.0` |
 | 공개 후보 | `extension-api`, `core`, `markdown`, `extensions`, `adapter-vanilla` |
 | 게시 상태 | `private: true`; 공개 이름·태그·권한 미확정 |
-| 후보 판정 | `CANDIDATE BLOCKED` |
+| 후보 판정 | 자동 품질 `PASS`; 공개 게시·릴리스 승인 미완료 |
 
 ## 2. 변경 요약
 
@@ -44,9 +44,9 @@
 
 | 범위 | 상태 |
 |---|---|
-| WebKit E2E | Windows 실행 환경 의존성 오류로 FAIL; Playwright WebKit revision `2359`, 실제 실행 브라우저 버전 확인 불가; 후보 차단 |
+| 자동 E2E | Docker Linux에서 Chromium·Firefox·WebKit 18/18 PASS; Windows WebKit DLL validator 실패는 이력으로 유지 |
 | 실제 브라우저 | Chrome·Edge·Firefox·Safari 최신·직전 메이저 미검증 |
-| 접근성 | 자동 axe·키보드 결과와 수동·보조공학 검증 분리; 수동·보조공학 미검증 |
+| 접근성·수동 UI | 세 엔진 자동 axe·키보드 PASS; 로컬 표시·입력, 수동·보조공학 미수행 |
 | Markdown | raw HTML은 실행·렌더링하지 않고 raw 원문 보존 |
 | 배포 | npm 조직·공개 이름·권한·라이선스·repository 미확정; 게시 금지 |
 
@@ -64,3 +64,5 @@
 | 버전 | 수정일 | 주요 변경사항 |
 |---|---|---|
 | 0.1.0 | 2026-09-30 | `0.x` 후보 변경·실험 API 경고·차단 제한 기록 |
+| 0.1.1 | 2026-10-01 | Docker Linux 자동 E2E PASS와 공개 게시 차단 유지 반영 |
+| 0.1.2 | 2026-10-01 | 로그 제외 최종 이미지 독립 자동 검증 PASS 반영 |
