@@ -1,5 +1,26 @@
 # DECISIONS — PRUN-2026-09-0006
 
+## D-09
+> 시각: 2026-10-01T03:44:27Z
+> 단계: codex
+> 상태: RESOLVED
+
+### 배경
+교차검증 PERFORMED, needs-attention, Critical0/High0/Medium6/Low7. 불변 검사 및 격리 통과.
+
+### 선택지
+1. 계약대로 Medium/Low는 기록하고 dev 병합한다.
+2. 별도 후속 범위를 정해 수정한다.
+
+### 권고안
+1번 — agent-flow.md §3 STEP C-1·§12의 Medium/Low 정책 적용.
+
+### 확정값
+review_by_claude.md에 원문 findings와 권고를 보존한다. Medium/Low는 기록만 하며 해결됐다고 주장하지 않는다. 공개 게시 전 후속 검토 후보로 인계한다.
+
+### 결정주체
+auto
+
 ## D-08
 > 시각: 2026-10-01T03:22:44Z
 > 단계: verifier
