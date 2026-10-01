@@ -70,6 +70,7 @@
 | TASK-03 | 배포 메타데이터·tarball 소비 검증 | TASK-00 | 2 | Must | FR-05, NFR-01, NFR-04 | M |
 | TASK-04 | 릴리스 증빙·노트·게시/되돌림 절차 | TASK-01, TASK-02, TASK-03, TASK-05 | 3 | Must | FR-01~FR-06, NFR-01~NFR-04 | M |
 | TASK-05 | 유효 GFM 혼합 목록 import 결함 수정 | TASK-00 | 2 | Must | FR-01, FR-02, NFR-01 | M |
+| TASK-06 | Docker Linux 자동 검증·로컬 playground 환경 | TASK-00, TASK-05, D-07 승인 | 2 | Must | FR-01, FR-02, FR-03, NFR-01, NFR-02 | M |
 
 ## Task 의존성 그래프
 
@@ -80,6 +81,8 @@ TASK-00 ──┬──> TASK-01 ──┐
 ```
 
 TASK-00 완료 → TASK-01·TASK-02·TASK-03 병렬 실행 → 발견 결함 TASK-05 보정 및 브라우저 재검증 → 네 작업 완료 후 TASK-04 실행.
+
+재개: D-07 승인 → TASK-06 Docker 구축/검증 → TASK-01 재검증 → TASK-04 증빙 갱신 → 교차검증·dev 병합.
 
 ## 리스크 및 대응
 

@@ -1,0 +1,24 @@
+services:
+  test:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.test
+    image: uc-markdown-web-test:local
+    working_dir: /app
+    environment:
+      CI: "1"
+    volumes:
+      - type: bind
+        source: ../playwright-report/${RUN_ID:?Set RUN_ID for this test execution}
+        target: /app/playwright-report
+      - type: bind
+        source: ../test-results/${RUN_ID:?Set RUN_ID for this test execution}
+        target: /app/test-results
+    command: pnpm exec playwright test
+
+  playground:
+    image: uc-markdown-web-test:local
+    working_dir: /app
+    command: pnpm --filter @uc-markdown-web/playground exec vite --host 0.0.0.0 --port 4173 --strictPort
+    ports:
+      - "127.0.0.1:4180:4173"
