@@ -1,0 +1,24 @@
+FROM mcr.microsoft.com/playwright:v1.63.0-noble
+
+USER root
+
+ARG NODE_VERSION=24.17.0
+ENV CI=1
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y ca-certificates curl xz-utils \
+    && curl --fail --location --silent --show-error "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" --output /tmp/node.tar.xz \
+    && tar --extract --xz --file /tmp/node.tar.xz --directory /usr/local --strip-components=1 \
+    && rm /tmp/node.tar.xz \
+    && corepack enable \
+    && corepack install --global pnpm@11.25.0 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . .
+
+RUN pnpm install --frozen-lockfile \
+    && pnpm build
+
+CMD ["pnpm", "exec", "playwright", "test"]

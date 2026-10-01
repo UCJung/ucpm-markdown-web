@@ -2,6 +2,7 @@
   "name": "@uc-markdown-web/core",
   "version": "0.0.0",
   "private": true,
+  "description": "Experimental 0.x editor core for UC Markdown Web.",
   "type": "module",
   "exports": {
     ".": {

@@ -16,3 +16,4 @@
 - UCPM 실행: `docs/UCPM_PIPELINE_GUIDE.md`
 - 브랜치·PR·릴리스: `docs/[GUIDE]_GIT_BRANCHING.md`
 - `docs/` 문서 작성: `docs/[GUIDE]_AUTHORING_STYLE.md`
+- 자동 테스트 배포·로컬 브라우저 확인: `docs/[GUIDE]_DEPLOYMENT.md`

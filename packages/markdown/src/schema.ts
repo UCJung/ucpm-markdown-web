@@ -9,7 +9,7 @@ const markdownExtension: Extension = {
       group: "block",
       atom: true
     },
-    task_list: { content: "task_item+", group: "block" },
+    task_list: { content: "(list_item | task_item)+", group: "block" },
     task_item: {
       attrs: { checked: { default: false } },
       content: "paragraph block*"

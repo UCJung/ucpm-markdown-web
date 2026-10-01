@@ -2,6 +2,7 @@
   "name": "@uc-markdown-web/extension-api",
   "version": "0.0.0",
   "private": true,
+  "description": "Experimental 0.x extension contracts for UC Markdown Web.",
   "type": "module",
   "exports": {
     ".": {
