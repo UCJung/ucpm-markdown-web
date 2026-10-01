@@ -18,7 +18,7 @@
 - 최종 이미지: sha256:6a9493277a2b0230034133cedb637a2572d27dba88d600e9741d06786aaebfc1 (linux/amd64).
 - 환경: Ubuntu24.04.4 LTS, Node24.17.0, pnpm11.25.0, Playwright1.63.0.
 - Builder 초기 이미지15973d3d7015: build/typecheck/Vitest62/docs/WebKit6/all18 PASS. RUN_ID 20261001-121500-webkit 및 20261001-121500-all.
-- 로그 디렉터리 추가 제외 후 최종 이미지로 독립 typecheck 및 18개 PASS(1.5m), RUN_ID 20261001-verifier-all18.
+- 로그 디렉터리 추가 제외 후 최종 이미지로 독립 typecheck/Vitest62/docsbuild(2.98s)/18개 PASS(1.5m), RUN_ID 20261001-verifier-all18 및 verifier-unit62/verifier-docs.
 - 엔진: Chromium153.0.8010.12, Firefox155.0, WebKit26.6.
 - Compose config exit0, playground127.0.0.1:4180→4173, HTTP200.
 - 보고서: playwright-report/<RUN_ID>/, test-results/<RUN_ID>/ (ignored, 호스트 보존).

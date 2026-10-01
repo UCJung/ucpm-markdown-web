@@ -35,6 +35,11 @@ button:hover { background: #004eeb; }
 .button-row { display: flex; flex-wrap: wrap; gap: .5rem; }
 .button-row button { margin-top: 0; }
 
+:is(button, select, textarea, .editor-surface .ProseMirror):focus-visible {
+  outline: 3px solid #004eeb;
+  outline-offset: 2px;
+}
+
 .workspace { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); margin-top: 1rem; }
 .editor-surface { border: 1px solid #afbdd3; border-radius: .4rem; min-height: 24rem; padding: .75rem; }
 .editor-surface .ProseMirror { min-height: 22rem; outline: none; }

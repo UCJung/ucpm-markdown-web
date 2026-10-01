@@ -35,14 +35,16 @@ PRUN-2026-09-0006: 공개 npm 0.x 후보 품질·문서·배포 준비
 
 ## Acceptance Criteria
 
-- [ ] 전체 공개 후보 5개의 build·typecheck·Vitest가 성공하고 테스트 수를 기록한다.
-- [ ] 초기화·시각 편집·조회·붙여넣기·종료 시나리오가 Chromium·Firefox·WebKit에서 성공한다.
-- [ ] 키보드 조작과 편집 상태 변화를 검증한다.
-- [ ] axe critical/serious 0건을 릴리스 후보 통과 기준으로 적용한다.
-- [ ] 실행 OS·Node·pnpm·Playwright/브라우저 버전, 명령, 결과, 발견 사항을 TASK 결과에 기록한다.
-- [ ] 수동·보조공학 검증은 별도 미검증 항목으로 TASK-04에 전달한다.
+- [x] 전체 공개 후보 5개의 build·typecheck·Vitest가 성공하고 테스트 수를 기록한다.
+- [x] 초기화·시각 편집·조회·붙여넣기·종료 시나리오가 Chromium·Firefox·WebKit에서 성공한다.
+- [x] 키보드 조작과 편집 상태 변화를 검증한다.
+- [x] axe critical/serious 0건을 릴리스 후보 통과 기준으로 적용한다.
+- [x] 실행 OS·Node·pnpm·Playwright/브라우저 버전, 명령, 결과, 발견 사항을 TASK 결과에 기록한다.
+- [x] 수동·보조공학 검증은 별도 미검증 항목으로 TASK-04에 전달한다.
 
 ## Verify
+
+2026-10-01 재개: D-07 승인 Docker Linux 경로는 docs/[GUIDE]_DEPLOYMENT.md §3을 적용한다. Windows WebKit 실행 실패와 Linux PASS를 구분한다.
 
 ```bash
 pnpm build
